@@ -1,37 +1,91 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:magic_sdk/magic_sdk.dart';
 import 'package:music_visualizer/music_visualizer.dart';
 import 'package:flutter/material.dart';
-import 'package:verbyl_project/authentication/login_phone.dart';
+import 'package:provider/provider.dart';
+import 'package:verbyl_project/models/authentication_controller.dart';
+import 'package:verbyl_project/models/music_player.dart';
+import 'package:verbyl_project/models/user.dart';
+import 'package:verbyl_project/services/data.dart';
 import '/theme.dart';
 import 'authentication/login_email.dart';
+import 'models/charts.dart';
 import 'pages/home.dart';
+import 'services/helpers.dart';
 
-String magicAuthCredentials = "pk_live_B8336C86A7989E33";
+//String magicAuthCredentials = "pk_live_B8336C86A7989E33";
+AuthenticationController authenticationController = AuthenticationController(FirebaseAuth.instance);
+VerbylUser user = VerbylUser();
 
-void main() {
-  runApp(const MyApp());
-  Magic.instance = Magic(magicAuthCredentials);
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const MyApp());
+  }
+  );
 }
+
+Charts? sss;
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  // void fun() async {
+  //   sss = await Helpers().getCharts("IN",20);
+  // }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        textTheme: GoogleFonts.montserratTextTheme(),
-      ),
-      title: 'Verbyl',
-      home: Stack(
-        children: [
-          const LoginEmail(),
-          Magic.instance.relayer,
-        ],
-      ),
+    //fun();
+    return MultiProvider(
+      providers: [
+        Provider<AuthenticationController>(
+          create: (_) => AuthenticationController(FirebaseAuth.instance),
+        ),
+        // ChangeNotifierProvider<MusicPlayerModel>(create: (_) => MusicPlayerModel(),),
+        // ChangeNotifierProvider<PlayingQueue>(create: (_) => PlayingQueue([]),),
+        StreamProvider(
+          create: (context) =>
+          context.read<AuthenticationController>().authStateChanges, initialData: null,
+        )
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          textTheme: GoogleFonts.montserratTextTheme(),
+        ),
+        title: 'Verbyl',
+        home: const SplashScreen(),
+      )
     );
+  }
+}
+
+class AuthenticationWrapper extends StatelessWidget {
+  const AuthenticationWrapper({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var firebaseUser = context.watch<User?>();
+    if (firebaseUser != null && firebaseUser.emailVerified){
+      //Logged in user
+      authenticationController.userEmail = firebaseUser.email.toString();
+      getUserData(authenticationController.userEmail).then((value){
+          debugPrint("Logged in directly from main.dart");
+          return const Home();
+      });
+      return const Home();
+    }
+    else {
+      return const LoginEmail();
+    }
   }
 }
 
@@ -44,15 +98,13 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
 
-  final List<Color> colors = [
-    Colors.lightBlue,
-    textLight,
-    Colors.blue.shade700,
-    textLight,
-    Colors.lightBlue
-  ];
-
-  final List<int> duration = [900, 700, 600, 800, 500];
+  @override
+  void initState() {
+    super.initState();
+    Timer(const Duration(seconds: 4), () => Navigator.of(context).pushReplacement(
+       MaterialPageRoute(builder: (context) => const AuthenticationWrapper()))
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,12 +122,12 @@ class _SplashScreenState extends State<SplashScreen> {
           SizedBox(
             height: size.height * 0.1,
             width: size.width * 0.75,
-            child: null,
-            // child: MusicVisualizer(
-            //   barCount: 15,
-            //   colors: colors,
-            //   duration: duration,
-            // ),
+            // child: null,
+            child: MusicVisualizer(
+              barCount: 15,
+              colors: colors,
+              duration: duration,
+            ),
           ),
         ],
       ),

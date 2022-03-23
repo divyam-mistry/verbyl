@@ -2,9 +2,13 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:verbyl_project/pages/artistPage.dart';
+import 'package:verbyl_project/pages/liked_songs.dart';
 import 'package:verbyl_project/pages/playlist.dart';
-
+import 'package:verbyl_project/pages/recently_played.dart';
 import '../models/general.dart';
+import '../models/song.dart';
+import '../services/helpers.dart';
 import '../theme.dart';
 
 class Library extends StatefulWidget {
@@ -174,12 +178,24 @@ class _LibraryState extends State<Library> {
                 numOfSongs: 5,
                 color: Colors.redAccent.shade400,
                 icon: const Icon(Icons.favorite_rounded),
+                func: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (ctx) =>
+                      LikedSongs(songs: player.queue.songs),
+                    )
+                  );
+                }
               ),
               makeListCard(
                 title: "Recently Played",
                 numOfSongs: 10,
                 color: Colors.blueAccent.shade400,
-                icon: const Icon(Icons.history_rounded),
+                icon: const Icon(Icons.history_rounded,),
+                func: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (ctx) =>
+                      RecentlyPlayed(songs: player.queue.songs),
+                    )
+                  );
+                }
               ),
               const SizedBox(height: 8,),
               if(userPlaylist.isNotEmpty) Divider(
@@ -204,7 +220,12 @@ class _LibraryState extends State<Library> {
     );
   }
 
-  Widget makeListCard({required String title,required Icon icon,required int numOfSongs,required Color color}){
+  Widget makeListCard({
+    required String title,
+    required Icon icon,
+    required int numOfSongs,
+    required Color color,
+    required Function() func}){
     return GestureDetector(
       child: SizedBox(
         height: 80,
@@ -225,7 +246,7 @@ class _LibraryState extends State<Library> {
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Center(
-                  child: Icon(icon.icon,color: Colors.white,),
+                  child: Icon(icon.icon,color: Colors.white,size: 28,),
                 ),
               ),
               const SizedBox(width: 20,),
@@ -251,17 +272,14 @@ class _LibraryState extends State<Library> {
           ),
         ),
       ),
-      onTap: (){
-        // PlaylistPage(title: title);
-        debugPrint(title);
-      },
+      onTap: func,
     );
   }
 
   Widget makePlaylistCard({required Playlist plist}){
     String title = plist.name.toString();
     int numOfSongs = plist.songs!.length;
-    Icon icon = const Icon(Icons.queue_music_rounded);
+    Icon icon = const Icon(CupertinoIcons.music_note_list);
     Color color = Colors.purple.shade400;
     return GestureDetector(
       child: SizedBox(
@@ -345,9 +363,11 @@ class _LibraryState extends State<Library> {
       ),
       onTap: (){
         // PlaylistPage(title: title);
-        Navigator.push(context, MaterialPageRoute(builder: (ctx) =>
-            PlaylistPage(playlist: plist))
-        );
+        Helpers().getData("hailee").then((value) {
+          Navigator.push(context, MaterialPageRoute(builder: (ctx) =>
+              PlaylistPage(playlist: plist,songs: value.data!,))
+          );
+        });
         debugPrint(title);
       },
     );

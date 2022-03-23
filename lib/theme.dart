@@ -7,3 +7,13 @@ Color secondary = const Color(0xFF292727);
 Color textLight = const Color(0xFFf2f2f2);
 Color textDark = const Color(0xFF292727);
 Color flushBarDark = const Color(0xFF2D2F51);
+
+final List<Color> colors = [
+  Colors.lightBlue,
+  textLight,
+  Colors.blue.shade700,
+  textLight,
+  Colors.lightBlue
+];
+
+final List<int> duration = [900, 700, 600, 800, 500];

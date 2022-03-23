@@ -1,18 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:verbyl_project/pages/sond_card.dart';
+import 'package:verbyl_project/pages/mini_music_player.dart';
+import 'package:verbyl_project/pages/song_card.dart';
 
 import '../models/general.dart';
+import '../services/helpers.dart';
 import '../models/song.dart';
 import '../theme.dart';
 import 'search.dart';
 
 class PlaylistPage extends StatefulWidget {
   final Playlist playlist;
+  final List<Datum> songs;
   const PlaylistPage({
     Key? key,
-    required this.playlist
+    required this.playlist,
+    required this.songs
   }) : super(key: key);
 
   @override
@@ -20,11 +24,13 @@ class PlaylistPage extends StatefulWidget {
 }
 
 class _PlaylistPageState extends State<PlaylistPage> {
-  bool isPlaying = false;
+  // bool isPlaying = false;
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    print("From Before Return:");
+    print(widget.songs[0].title);
     return SafeArea(
         child: Scaffold(
           backgroundColor: bgDark,
@@ -58,14 +64,16 @@ class _PlaylistPageState extends State<PlaylistPage> {
                               width: 80,
                               child: IconButton(
                                 onPressed: (){
+                                  player.queue.loadSongs(widget.songs);
+                                  player.isPlaying = !player.isPlaying;
                                   setState(() {
-                                    isPlaying = !isPlaying;
                                   });
                                 },
                                 icon: Icon(
-                                  isPlaying
-                                      ? CupertinoIcons.pause_circle_fill
-                                      : CupertinoIcons.play_circle_fill,
+                                  // isPlaying
+                                  //     ? CupertinoIcons.pause_circle_fill
+                                  //     :
+                                  CupertinoIcons.play_circle_fill,
                                   size: 60,
                                   color: textLight,
                                 ),
@@ -78,10 +86,10 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     SizedBox(
                       height: 470,
                       child: FutureBuilder(
-                          future: getData("hailee"),
+                          future: Helpers().getData("hailee"),
                           builder: (ctx,snapshot){
                             if(snapshot.hasError){
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(child: CircularProgressIndicator(color: Colors.red,));
                             }
                             else if(snapshot.connectionState == ConnectionState.done){
                               final songs = snapshot.data! as Songs;
@@ -111,6 +119,9 @@ class _PlaylistPageState extends State<PlaylistPage> {
               )),
             ],
           ),
+          persistentFooterButtons: [
+            MiniMusicPlayer()
+          ],
         ),
     );
   }

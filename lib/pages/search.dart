@@ -1,16 +1,11 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
+import 'package:verbyl_project/pages/song_card.dart';
+import 'package:verbyl_project/services/helpers.dart';
 import 'package:verbyl_project/models/song.dart';
-import 'package:verbyl_project/pages/music_player.dart';
 import '../models/general.dart';
 import '../theme.dart';
-
-Songs? _songs;
 
 class Search extends StatefulWidget {
   const Search({Key? key}) : super(key: key);
@@ -19,24 +14,13 @@ class Search extends StatefulWidget {
   _SearchState createState() => _SearchState();
 }
 
-Future<Songs> getData(String query) async {
-  query = query.trim().toLowerCase();
-  var uri = Uri.parse("https://deezerdevs-deezer.p.rapidapi.com/search?q=$query");
-  final response = await http.get( uri,
-    headers: {
-      "x-rapidapi-host" : "deezerdevs-deezer.p.rapidapi.com",
-      "x-rapidapi-key" : "44ddcae731mshd3bec744261612cp10453fjsn107100f92202",
-    },
-  );
-  _songs = songFromJson(response.body);
-  debugPrint(_songs!.data![0].title.toString());
-  debugPrint(_songs!.data![0].artist?.name.toString());
-  // var test = jsonDecode(response.body);
-  // debugPrint(test["data"][0]["title"].toString());
-  return _songs!;
-}
-
 class _SearchState extends State<Search> {
+  @override
+  void initState() {
+    //Helpers().predictMood("Blinding Lights");
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -48,16 +32,21 @@ class _SearchState extends State<Search> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 15,),
-            Text("Search",
+            const SizedBox(
+              height: 15,
+            ),
+            Text(
+              "Search",
               style: TextStyle(
                 color: textLight,
                 fontSize: 26,
               ),
             ),
-            const SizedBox(height: 25,),
+            const SizedBox(
+              height: 25,
+            ),
             GestureDetector(
-              onTap: (){
+              onTap: () {
                 showSearch(context: context, delegate: DataSearch());
               },
               child: Container(
@@ -71,54 +60,111 @@ class _SearchState extends State<Search> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(width: 15,),
-                    Icon(Icons.search_rounded,
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    Icon(
+                      Icons.search_rounded,
                       color: Colors.grey.shade700,
                       size: 30,
                     ),
-                    const SizedBox(width: 15,),
-                    Text("Songs or Artists",style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 20,
-                    ),),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    Text(
+                      "Songs or Artists",
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 20,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 25,),
-            FutureBuilder(
-              future: getData("Blinding Lights"),
-              builder: (ctx,snapshot){
-                if(snapshot.connectionState == ConnectionState.done){
-                  if(snapshot.hasData){
-                    final data = snapshot.data as Songs;
-                    return Text(data.data![0].title.toString() + "\n" + data.data![0].artist!.name.toString(),
-                      style: TextStyle(fontSize: 18,color: textLight),
-                    );
-                  }
-                  else if(snapshot.hasError){
-                    return Text( "Snapshot.error = " + snapshot.error.toString(),
-                      style: TextStyle(fontSize: 18,color: textLight),
-                    );
-                  }
-                  else {
-                    return Text("Error",
-                      style: TextStyle(fontSize: 18,color: textLight),);
-                  }
-                }
-                else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
-            )
+            const SizedBox(
+              height: 25,
+            ),
+            _makeMoodButton(
+              mood: "Happy",
+              clr: Colors.redAccent,
+              onPressed: (){}
+            ),
+            _makeMoodButton(
+                mood: "Energetic",
+                clr: Colors.deepPurple,
+                onPressed: (){}
+            ),
+            _makeMoodButton(
+                mood: "Sad",
+                clr: const Color(0xFF211d22),
+                onPressed: (){}
+            ),
+            _makeMoodButton(
+                mood: "Calm",
+                clr: const Color(0xFF00b9bc),
+                onPressed: (){}
+            ),
           ],
         ),
       ),
     );
   }
+
+  Widget _makeMoodButton({required String mood,required Function() onPressed,required Color clr}){
+    Size size = MediaQuery.of(context).size;
+    return GestureDetector(
+      onTap: onPressed,
+      child: Column(
+        children: [
+          Container(
+            width: size.width,
+            height: 100,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [
+                  clr,
+                  clr.withOpacity(0.8),
+                  clr.withOpacity(0.7),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: Image.asset('assets/images/${mood.toLowerCase().toString()}.png'),
+                  ),
+                ),
+                Positioned(
+                  left: 20,
+                  bottom: 20,
+                  child: Text(mood, style: GoogleFonts.montserrat(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: textLight,
+                  ),),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 15,),
+        ],
+      ),
+    );
+  }
+
 }
 
-class DataSearch extends SearchDelegate<String>{
+class DataSearch extends SearchDelegate<String> {
+
+  List<Artist?> artist = [];
+  List<Datum> songs = [];
 
   String searchedSong = "";
 
@@ -138,35 +184,65 @@ class DataSearch extends SearchDelegate<String>{
 
   @override
   List<Widget>? buildActions(BuildContext context) {
-      return [
-        IconButton(
-            onPressed: (){
-              query = "";
-            },
-            icon: const Icon(Icons.clear_rounded)
-        ),
-      ];
+    return [
+      IconButton(
+          onPressed: () {
+            query = "";
+            artist.clear();
+            songs.clear();
+          },
+          icon: const Icon(Icons.clear_rounded)),
+    ];
   }
 
   @override
   Widget? buildLeading(BuildContext context) {
-      return IconButton(
-        icon: AnimatedIcon(
-          icon: AnimatedIcons.menu_arrow,
-          progress: transitionAnimation,
-        ),
-        onPressed: (){
-          searchedSong = "";
-          close(context, "");
-        },
-      );
+    return IconButton(
+      icon: AnimatedIcon(
+        icon: AnimatedIcons.menu_arrow,
+        progress: transitionAnimation,
+      ),
+      onPressed: () {
+        searchedSong = "";
+        close(context, "");
+      },
+    );
   }
 
   @override
   Widget buildResults(BuildContext context) {
+    artist = [];
+    songs = [];
     return Scaffold(
       backgroundColor: bgDark,
-      body: null,
+      body: (artist.isEmpty && songs.isEmpty)
+          ? FutureBuilder(
+              future: Helpers().getSearchResults(query),
+              builder: (ctx, ss) {
+                if (ss.connectionState == ConnectionState.done && ss.hasData) {
+                  var artistAndSongs = ss.data as ArtistAndSearchQueryResults;
+                  artist = artistAndSongs.artist;
+                  songs = artistAndSongs.songs;
+                  return ListView.builder(
+                      itemCount: artist.length + songs.length,
+                      itemBuilder: (ctx, i) {
+                        if (i < artist.length) return ArtistCard(artist: artist[i]!);
+                        return SongCard(songs: songs[i - artist.length]);
+                      }
+                    );
+                }
+                if(query.isEmpty) return buildSuggestions(context);
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            )
+          : ListView.builder(
+              itemCount: artist.length + songs.length,
+              itemBuilder: (ctx, i) {
+                if (i < artist.length) return ArtistCard(artist: artist[i]!);
+                return SongCard(songs: songs[i - artist.length]);
+              }),
     );
   }
 
@@ -174,7 +250,9 @@ class DataSearch extends SearchDelegate<String>{
   Widget buildSuggestions(BuildContext context) {
     final suggestionsList = query.isEmpty
         ? recentSongs
-        : songList.where((s) => s.name.toLowerCase().startsWith(query.toLowerCase())).toList();
+        : songList
+            .where((s) => s.name.toLowerCase().startsWith(query.toLowerCase()))
+            .toList();
     return Scaffold(
       backgroundColor: bgDark.withOpacity(0.9),
       body: Column(
@@ -186,7 +264,8 @@ class DataSearch extends SearchDelegate<String>{
                   height: 50,
                   child: Padding(
                     padding: const EdgeInsets.all(15.0),
-                    child: Text("Recent Searches",
+                    child: Text(
+                      "Suggestions",
                       style: TextStyle(
                         fontSize: 18,
                         color: textLight,
@@ -195,48 +274,57 @@ class DataSearch extends SearchDelegate<String>{
                     ),
                   ),
                 )
-              : const SizedBox(height: 10,),
+              : const SizedBox(
+                  height: 10,
+                ),
           suggestionsList.isNotEmpty
               ? SizedBox(
-                height: 300,
-                child: ListView.builder(
-                    itemCount: suggestionsList.length,
-                    itemBuilder: (ctx,i){
-                      return ListTile(
-                        leading: Icon(Icons.music_note_rounded,
-                          color: textLight,
-                        ),
-                        title: RichText(
-                          text: TextSpan(
-                            text: suggestionsList[i].name.substring(0,query.length),
-                            style: GoogleFonts.montserrat(
-                              color: textLight,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: suggestionsList[i].name.substring(query.length),
-                                style: GoogleFonts.montserrat(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
+                  height: 300,
+                  child: ListView.builder(
+                      itemCount: suggestionsList.length,
+                      itemBuilder: (ctx, i) {
+                        return ListTile(
+                          leading: Icon(
+                            Icons.music_note_rounded,
+                            color: textLight,
                           ),
-                        ),
-                        onTap: (){
-                          debugPrint(searchedSong = suggestionsList[i].name.toString());
-                          showResults(context);
-                        },
-                      );
-                    }
-            ),
-          )
+                          title: RichText(
+                            text: TextSpan(
+                              text: suggestionsList[i]
+                                  .name
+                                  .substring(0, query.length),
+                              style: GoogleFonts.montserrat(
+                                color: textLight,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: suggestionsList[i]
+                                      .name
+                                      .substring(query.length),
+                                  style: GoogleFonts.montserrat(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onTap: () {
+                            query = suggestionsList[i].name.toString();
+                            debugPrint(searchedSong =
+                                suggestionsList[i].name.toString());
+                            showResults(context);
+                          },
+                        );
+                      }),
+                )
               : const Center(
-                child: SizedBox(
+                  child: SizedBox(
                     height: 50,
                     child: Padding(
                       padding: EdgeInsets.all(15.0),
-                      child: Text("No songs found !",
+                      child: Text(
+                        "No songs found !",
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.grey,
@@ -245,10 +333,9 @@ class DataSearch extends SearchDelegate<String>{
                       ),
                     ),
                   ),
-              ),
+                ),
         ],
       ),
     );
   }
-
 }

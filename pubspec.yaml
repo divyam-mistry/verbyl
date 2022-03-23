@@ -15,14 +15,19 @@ dependencies:
     sdk: flutter
   google_fonts: ^2.2.0
   music_visualizer: ^1.0.2
-  magic_sdk: ^0.4.0
   bottom_navy_bar: ^6.0.0
   cupertino_icons: ^1.0.2
   another_flushbar: ^1.10.28
   http:
   palette_generator: ^0.3.2
   shimmer: ^2.0.0
-  marquee: ^2.2.0
+  firebase_core:
+  firebase_auth: ^3.3.7
+  provider:
+  geolocator: ^8.2.0
+  geocode: ^1.0.1
+  charts_flutter: ^0.12.0
+  audioplayers: ^0.20.1
 
 dev_dependencies:
   flutter_test:
@@ -43,6 +48,10 @@ flutter:
     - assets/images/2.png
     - assets/images/3.png
     - assets/images/4.png
+    - assets/images/happy.png
+    - assets/images/sad.png
+    - assets/images/calm.png
+    - assets/images/energetic.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

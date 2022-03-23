@@ -6,26 +6,25 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:verbyl_project/authentication/email_verification.dart';
-import 'package:verbyl_project/authentication/register_email.dart';
 import 'package:verbyl_project/main.dart';
-import '../pages/home.dart';
-import '../services/data.dart';
 import 'validators.dart';
 import '/theme.dart';
 
 String userEmail = "";
 
-class LoginEmail extends StatefulWidget {
-  const LoginEmail({Key? key}) : super(key: key);
+class Register extends StatefulWidget {
+  const Register({Key? key}) : super(key: key);
 
   @override
-  _LoginEmailState createState() => _LoginEmailState();
+  _RegisterState createState() => _RegisterState();
 }
 
-class _LoginEmailState extends State<LoginEmail> {
+class _RegisterState extends State<Register> {
+
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  String emailId = "", password = "";
+  String name = "", emailId = "", password = "";
 
 
   @override
@@ -44,7 +43,7 @@ class _LoginEmailState extends State<LoginEmail> {
           centerTitle: true,
           backgroundColor: bgDark,
           elevation: 0.0,
-          title: Text("Login",
+          title: Text("Register",
             style: GoogleFonts.montserrat(
               color: textLight,
               fontWeight: FontWeight.bold,
@@ -82,7 +81,52 @@ class _LoginEmailState extends State<LoginEmail> {
               //     ),
               //   ),
               // ),
-              const SizedBox(height: 30,),
+              const SizedBox(height: 10,),
+              SizedBox(
+                height: 0.1 * size.height,
+                width: 0.85 * size.width,
+                child: TextField(
+                  style: GoogleFonts.montserrat(color: textLight),
+                  controller: nameController,
+                  onChanged: (value){
+                    setState(() {
+                      name = value.trim();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: textLight),
+                        borderRadius: const BorderRadius.all(Radius.circular(5.0))
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: textLight),
+                        borderRadius: const BorderRadius.all(Radius.circular(5.0))
+                    ),
+                    errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: textLight),
+                        borderRadius: const BorderRadius.all(Radius.circular(5.0))
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: textLight),
+                        borderRadius: const BorderRadius.all(Radius.circular(5.0))
+                    ),
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.only(left: 20.0,right: 10.0),
+                      child: Icon(CupertinoIcons.person,color: Color(0xfff2f2f2),),
+                    ),
+                    labelText: "Name",
+                    labelStyle: GoogleFonts.montserrat(color: textLight),
+                    errorStyle: GoogleFonts.montserrat(),
+                    errorText: name.isNotEmpty
+                        ? NameValidator.validate(name)
+                        : "",
+                  ),
+                  // ignore: prefer_const_literals_to_create_immutables
+                  autofillHints: [AutofillHints.namePrefix],
+                  keyboardType: TextInputType.text,
+                ),
+              ),
+              const SizedBox(height: 10,),
               SizedBox(
                 height: 0.1 * size.height,
                 width: 0.85 * size.width,
@@ -113,7 +157,7 @@ class _LoginEmailState extends State<LoginEmail> {
                     ),
                     prefixIcon: const Padding(
                       padding: EdgeInsets.only(left: 20.0,right: 10.0),
-                      child: Icon(Icons.mail,color: Color(0xfff2f2f2),),
+                      child: Icon(CupertinoIcons.mail_solid,color: Color(0xfff2f2f2),),
                     ),
                     labelText: "Email-id",
                     labelStyle: GoogleFonts.montserrat(color: textLight),
@@ -158,7 +202,7 @@ class _LoginEmailState extends State<LoginEmail> {
                     ),
                     prefixIcon: const Padding(
                       padding: EdgeInsets.only(left: 20.0,right: 10.0),
-                      child: Icon(Icons.password_rounded,color: Color(0xfff2f2f2),),
+                      child: Icon(CupertinoIcons.padlock_solid,color: Color(0xfff2f2f2),),
                     ),
                     labelText: "Password",
                     labelStyle: GoogleFonts.montserrat(color: textLight),
@@ -189,11 +233,10 @@ class _LoginEmailState extends State<LoginEmail> {
                         authenticationController.userPassword = password;
                       });
                       try{
-                        if(await authenticationController.signIn()){
-                          getUserData(emailId);
+                        if(await authenticationController.signUp()){
                           //Logged in successfully
                           Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => const Home())
+                              MaterialPageRoute(builder: (context) => VerifyScreen(name: nameController.text,),)
                           );
                         }
                       }
@@ -202,30 +245,9 @@ class _LoginEmailState extends State<LoginEmail> {
                       }
                     }
                   },
-                  child: Text("Continue",
-                    style: GoogleFonts.montserrat(
-                      color: textLight,
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20,),
-              SizedBox(
-                height: 56,
-                width: 0.85 * size.width,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: textLight,
-                  ),
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const Register())
-                    );
-                  },
                   child: Text("Register",
                     style: GoogleFonts.montserrat(
-                      color: primary,
+                      color: textLight,
                       fontSize: 18,
                     ),
                   ),
@@ -261,5 +283,6 @@ class _LoginEmailState extends State<LoginEmail> {
       ),
     );
   }
+
 }
 

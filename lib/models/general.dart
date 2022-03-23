@@ -1,16 +1,20 @@
 import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:verbyl_project/models/user.dart';
 
-class Charts {
-  Charts({
+class ChartsDemo {
+  ChartsDemo({
     this.title = "",
     this.country = "",
+    this.color,
   });
   String title;
   String country;
+  Color? color;
 }
 
-class Artist {
-  Artist({
+class DemoArtist {
+  DemoArtist({
     this.name = "",
     this.imageLink = "",
   });
@@ -34,6 +38,7 @@ class Playlist {
 
 //List<Song> songs = List<Song>.empty(growable: true);
 }
+
 List<Playlist> userPlaylist = [
   Playlist(
       name: "LOFI Songs",
@@ -61,26 +66,8 @@ List<Playlist> userPlaylist = [
   ),
 ];
 
-
-class User {
-  String name;
-  String email;
-  String location;
-  int avatarIndex;
-  int followingArtists;
-  int playlists;
-  User({
-    this.name = "",
-    this.avatarIndex = 1,
-    this.followingArtists = 0,
-    this.playlists = 0,
-    this.email = "",
-    this.location = "",
-  });
-}
-
-List<User> users = [
-  User(
+List<VerbylUser> users = [
+  VerbylUser.named(
     name: "Divyam Mistry",
     email: "divsmistry30@gmail.com",
     location: "Bilimora, Gujarat",
@@ -88,7 +75,7 @@ List<User> users = [
     followingArtists: 3,
     playlists: 3,
   ),
-  User(
+  VerbylUser.named(
     name: "Arnish Mistry",
     email: "arnishmistry@gmail.com",
     location: "Surat, Gujarat",

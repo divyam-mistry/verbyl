@@ -40,5 +40,16 @@ class NameValidator {
   }
 }
 
+class PasswordValidator {
+  static String? validate(String value) {
+    if(value.isEmpty) {
+      return "Password can't be empty!";
+    }
+    if(value.length < 8){
+      return "Please enter a valid password";
+    }
+    return null;
+  }
+}
 
 
