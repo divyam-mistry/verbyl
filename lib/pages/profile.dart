@@ -27,6 +27,14 @@ class _ProfileState extends State<Profile> {
   ];
 
   @override
+  void initState() {
+    getUserData(authenticationController.userEmail).then((value){
+      debugPrint("Got user data from initState profile.dart");
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<charts.Series<SongsDataMoods,String>> series = [
       charts.Series(
@@ -52,8 +60,9 @@ class _ProfileState extends State<Profile> {
           IconButton(
             onPressed: () {
               //AuthenticationController ac = AuthenticationController(FirebaseAuth.instance);
-              authenticationController.signOut();
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginEmail()));
+              authenticationController.signOut().then((value){
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginEmail()));
+              });
             }, icon: Icon(Icons.logout,color: textLight,),
           ),
         ],
@@ -189,63 +198,12 @@ class _ProfileState extends State<Profile> {
                         height: 15,
                       ),
                       FutureBuilder(
-                          future: getLocation(),
-                          builder: (ctx, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                              var result = snapshot.data as StringAndBool;
-                              var address = result.address;
-                              if (result.isLocationDenied) {
-                                return Container(
-                                  height: 80,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: bgDark,
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(15.0),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(15.0),
-                                        child: Text(
-                                          "Location services are disabled",
-                                          style: GoogleFonts.montserrat(
-                                            color: Colors.grey.shade400,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () async {
-                                          setState(() {});
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Container(
-                                              decoration: BoxDecoration(
-                                                color: primary.withOpacity(0.6),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                  Radius.circular(10.0),
-                                                ),
-                                              ),
-                                              width: 60,
-                                              height: 100,
-                                              child: Icon(
-                                                CupertinoIcons
-                                                    .arrow_2_circlepath,
-                                                color: textLight,
-                                                size: 24,
-                                              )),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
+                        future: getLocation(),
+                        builder: (ctx, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                            var result = snapshot.data as StringAndBool;
+                            var address = result.address;
+                            if (result.isLocationDenied) {
                               return Container(
                                 height: 80,
                                 width: double.infinity,
@@ -257,34 +215,16 @@ class _ProfileState extends State<Profile> {
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Padding(
                                       padding: const EdgeInsets.all(15.0),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Your Location",
-                                            style: GoogleFonts.montserrat(
-                                              color: Colors.grey.shade400,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text(
-                                            address.toString(),
-                                            style: GoogleFonts.montserrat(
-                                              color: textLight,
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                        ],
+                                      child: Text(
+                                        "Location services are disabled",
+                                        style: GoogleFonts.montserrat(
+                                          color: Colors.grey.shade400,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                     ),
                                     GestureDetector(
@@ -297,14 +237,15 @@ class _ProfileState extends State<Profile> {
                                             decoration: BoxDecoration(
                                               color: primary.withOpacity(0.6),
                                               borderRadius:
-                                                  const BorderRadius.all(
+                                              const BorderRadius.all(
                                                 Radius.circular(10.0),
                                               ),
                                             ),
                                             width: 60,
                                             height: 100,
                                             child: Icon(
-                                              CupertinoIcons.arrow_2_circlepath,
+                                              CupertinoIcons
+                                                  .arrow_2_circlepath,
                                               color: textLight,
                                               size: 24,
                                             )),
@@ -323,14 +264,209 @@ class _ProfileState extends State<Profile> {
                                   Radius.circular(15.0),
                                 ),
                               ),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: primary,
-                                ),
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(15.0),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Your Location",
+                                          style: GoogleFonts.montserrat(
+                                            color: Colors.grey.shade400,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          address.toString(),
+                                          style: GoogleFonts.montserrat(
+                                            color: textLight,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      setState(() {});
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                            color: primary.withOpacity(0.6),
+                                            borderRadius:
+                                            const BorderRadius.all(
+                                              Radius.circular(10.0),
+                                            ),
+                                          ),
+                                          width: 60,
+                                          height: 100,
+                                          child: Icon(
+                                            CupertinoIcons.arrow_2_circlepath,
+                                            color: textLight,
+                                            size: 24,
+                                          )),
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
-                          },
-                        ),
+                          }
+                          return Container(
+                            height: 80,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: bgDark,
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(15.0),
+                              ),
+                            ),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: primary,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      // if(isLocationPermissionDenied) Container(
+                      //   height: 80,
+                      //   width: double.infinity,
+                      //   decoration: BoxDecoration(
+                      //     color: bgDark,
+                      //     borderRadius: const BorderRadius.all(
+                      //       Radius.circular(15.0),
+                      //     ),
+                      //   ),
+                      //   child: Row(
+                      //     mainAxisAlignment:
+                      //     MainAxisAlignment.spaceBetween,
+                      //     children: [
+                      //       Padding(
+                      //         padding: const EdgeInsets.all(15.0),
+                      //         child: Text(
+                      //           "Location services are disabled",
+                      //           style: GoogleFonts.montserrat(
+                      //             color: Colors.grey.shade400,
+                      //             fontSize: 16,
+                      //           ),
+                      //         ),
+                      //       ),
+                      //       GestureDetector(
+                      //         onTap: () async {
+                      //           setState(() {
+                      //             getLocation().then((value){
+                      //               verbylUserLocation = value.address;
+                      //               isLocationPermissionDenied = value.isLocationDenied;
+                      //             });
+                      //           });
+                      //         },
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.all(8.0),
+                      //           child: Container(
+                      //               decoration: BoxDecoration(
+                      //                 color: primary.withOpacity(0.6),
+                      //                 borderRadius:
+                      //                 const BorderRadius.all(
+                      //                   Radius.circular(10.0),
+                      //                 ),
+                      //               ),
+                      //               width: 60,
+                      //               height: 100,
+                      //               child: Icon(
+                      //                 CupertinoIcons
+                      //                     .arrow_2_circlepath,
+                      //                 color: textLight,
+                      //                 size: 24,
+                      //               )),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // if(verbylUserLocation.isNotEmpty) Container(
+                      //   height: 80,
+                      //   width: double.infinity,
+                      //   decoration: BoxDecoration(
+                      //     color: bgDark,
+                      //     borderRadius: const BorderRadius.all(
+                      //       Radius.circular(15.0),
+                      //     ),
+                      //   ),
+                      //   child: Row(
+                      //     mainAxisAlignment:
+                      //     MainAxisAlignment.spaceBetween,
+                      //     children: [
+                      //       Padding(
+                      //         padding: const EdgeInsets.all(15.0),
+                      //         child: Column(
+                      //           mainAxisAlignment:
+                      //           MainAxisAlignment.center,
+                      //           crossAxisAlignment:
+                      //           CrossAxisAlignment.start,
+                      //           children: [
+                      //             Text(
+                      //               "Your Location",
+                      //               style: GoogleFonts.montserrat(
+                      //                 color: Colors.grey.shade400,
+                      //                 fontSize: 14,
+                      //               ),
+                      //             ),
+                      //             const SizedBox(
+                      //               height: 5,
+                      //             ),
+                      //             Text(
+                      //               verbylUserLocation.toString(),
+                      //               style: GoogleFonts.montserrat(
+                      //                 color: textLight,
+                      //                 fontSize: 18,
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       ),
+                      //       GestureDetector(
+                      //         onTap: () async {
+                      //           setState(() {
+                      //             getLocation().then((value){
+                      //               verbylUserLocation = value.address;
+                      //               isLocationPermissionDenied = value.isLocationDenied;
+                      //             });
+                      //           });
+                      //         },
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.all(8.0),
+                      //           child: Container(
+                      //               decoration: BoxDecoration(
+                      //                 color: primary.withOpacity(0.6),
+                      //                 borderRadius:
+                      //                 const BorderRadius.all(
+                      //                   Radius.circular(10.0),
+                      //                 ),
+                      //               ),
+                      //               width: 60,
+                      //               height: 100,
+                      //               child: Icon(
+                      //                 CupertinoIcons.arrow_2_circlepath,
+                      //                 color: textLight,
+                      //                 size: 24,
+                      //               )),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // )
                     ],
                   ),
                 ),

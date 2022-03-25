@@ -99,7 +99,7 @@ class _PlayingQueuePageState extends State<PlayingQueuePage> {
                                     "https://m.media-amazon.com/images/G/01/digital/music/player/web/sixteen_frame_equalizer_accent.gif"),
                               ),
                             )
-                          : SizedBox(),
+                          : const SizedBox(),
                     ],
                   ),
                   const SizedBox(
@@ -117,7 +117,7 @@ class _PlayingQueuePageState extends State<PlayingQueuePage> {
                             ),
                             textAlign: TextAlign.start,
                           ),
-                        ) : SizedBox(),
+                        ) : const SizedBox(),
                       // : Padding(
                       //     padding: const EdgeInsets.symmetric(
                       //         vertical: 10, horizontal: 20),
@@ -251,7 +251,7 @@ class _PlayingQueuePageState extends State<PlayingQueuePage> {
                 //       ),
                 //     ]),
                 //   ),
-                : SizedBox(),
+                : const SliverToBoxAdapter(child: SizedBox(),),
           ],
         ),
       ),

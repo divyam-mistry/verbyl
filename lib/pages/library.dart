@@ -6,7 +6,9 @@ import 'package:verbyl_project/pages/artistPage.dart';
 import 'package:verbyl_project/pages/liked_songs.dart';
 import 'package:verbyl_project/pages/playlist.dart';
 import 'package:verbyl_project/pages/recently_played.dart';
+import 'package:verbyl_project/services/data.dart';
 import '../models/general.dart';
+import '../models/playlist.dart';
 import '../models/song.dart';
 import '../services/helpers.dart';
 import '../theme.dart';
@@ -19,6 +21,7 @@ class Library extends StatefulWidget {
 }
 
 class _LibraryState extends State<Library> {
+  bool isLoading = false, isClicked = false, isCorrect = false;
 
   TextEditingController dialogController = TextEditingController();
   showCreatePlaylistDialog(BuildContext context) {
@@ -27,91 +30,153 @@ class _LibraryState extends State<Library> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: bgDark,
-          title: Text('Create a Playlist',
+          title: Text(
+            'Create a Playlist',
             style: GoogleFonts.montserrat(
               color: textLight,
             ),
           ),
-          content: TextField(
-            style: GoogleFonts.montserrat(
-              color: textLight,
-            ),
-            controller: dialogController,
-            decoration: InputDecoration(
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: textLight),
-              ),
-              hintText: "Enter Playlist name",
-              hintStyle: GoogleFonts.montserrat(
-                color: Colors.grey,
-              ),
-            ),
+          content: StatefulBuilder(
+            builder: (BuildContext ctx, StateSetter setModalState) {
+              return SizedBox(
+                height: 120,
+                child: Column(
+                  children: [
+                    TextField(
+                      style: GoogleFonts.montserrat(
+                        color: textLight,
+                      ),
+                      controller: dialogController,
+                      decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: textLight),
+                        ),
+                        hintText: "Enter Playlist Name",
+                        hintStyle: GoogleFonts.montserrat(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          child: Text(
+                            'CANCEL',
+                            style: GoogleFonts.montserrat(
+                              color: textLight,
+                            ),
+                          ),
+                          onPressed: () {
+                            dialogController.clear();
+                            Navigator.pop(context);
+                          },
+                        ),
+                        TextButton(
+                          child: isLoading
+                              ? const CircularProgressIndicator()
+                              : isClicked
+                                  ? const Icon(Icons.done)
+                                  : Text(
+                                      'OK',
+                                      style: GoogleFonts.montserrat(
+                                        color: textLight,
+                                      ),
+                                    ),
+                          onPressed: () {
+                            if(isClicked) return;
+                            setModalState(() {
+                              isLoading = true;
+                            });
+                            if(isLoading && mounted){
+                              addUserPlaylists(
+                                  uid.toString(),
+                                  dialogController.text,
+                                  DateTime.now()
+                              ).then((value){
+                                setModalState((){
+                                  isLoading = false;
+                                  isClicked = true;
+                                  isCorrect = true;
+                                  Navigator.of(context).pop();
+                                });
+                                Flushbar(
+                                  flushbarPosition: FlushbarPosition.TOP,
+                                  duration: const Duration(seconds: 3),
+                                  flushbarStyle: FlushbarStyle.FLOATING,
+                                  messageText: Text("Created new playlist named " + dialogController.text,
+                                    style: GoogleFonts.montserrat(color: textLight),
+                                  ),
+                                  margin: const EdgeInsets.all(8),
+                                  borderRadius: BorderRadius.circular(8),
+                                  backgroundColor: flushBarDark,
+                                  messageColor: textLight,
+                                  icon: Icon(
+                                    Icons.done_rounded,
+                                    size: 28.0,
+                                    color: Colors.green[400],
+                                  ),
+                                ).show(context);
+                              });
+                            }
+                            // int index = userPlaylistDemo.indexWhere((element) => element.name == dialogController.text);
+                            // if(index >= 0){
+                            //   Navigator.pop(context);
+                            //   Flushbar(
+                            //     flushbarPosition: FlushbarPosition.TOP,
+                            //     duration: const Duration(seconds: 3),
+                            //     flushbarStyle: FlushbarStyle.FLOATING,
+                            //     messageText: Text("Playlist already exists",
+                            //       style: GoogleFonts.montserrat(color: textLight),
+                            //     ),
+                            //     margin: const EdgeInsets.all(8),
+                            //     borderRadius: BorderRadius.circular(8),
+                            //     backgroundColor: flushBarDark,
+                            //     messageColor: textLight,
+                            //     icon: Icon(
+                            //       Icons.error,
+                            //       size: 28.0,
+                            //       color: Colors.red[400],
+                            //     ),
+                            //   ).show(context);
+                            //   debugPrint("Playlist already exists");
+                            // }
+                            // else{
+                            //   userPlaylistDemo.add(PlaylistDemo(name: dialogController.text,songs: []));
+                            //   users[0].playlists++;
+                            //   Navigator.pop(context);
+                            //   Flushbar(
+                            //     flushbarPosition: FlushbarPosition.TOP,
+                            //     duration: const Duration(seconds: 3),
+                            //     flushbarStyle: FlushbarStyle.FLOATING,
+                            //     messageText: Text("Created new playlist named " + dialogController.text,
+                            //       style: GoogleFonts.montserrat(color: textLight),
+                            //     ),
+                            //     margin: const EdgeInsets.all(8),
+                            //     borderRadius: BorderRadius.circular(8),
+                            //     backgroundColor: flushBarDark,
+                            //     messageColor: textLight,
+                            //     icon: Icon(
+                            //       Icons.done_rounded,
+                            //       size: 28.0,
+                            //       color: Colors.green[400],
+                            //     ),
+                            //   ).show(context);
+                            // }
+                            debugPrint(dialogController.text);
+                            dialogController.clear();
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('CANCEL',style: GoogleFonts.montserrat(
-                color: textLight,
-              ),),
-              onPressed: () {
-                dialogController.clear();
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: Text('OK',style: GoogleFonts.montserrat(
-                color: textLight,
-              ),),
-              onPressed: () {
-                int index = userPlaylist.indexWhere((element) => element.name == dialogController.text);
-                if(index >= 0){
-                  Navigator.pop(context);
-                  Flushbar(
-                    flushbarPosition: FlushbarPosition.TOP,
-                    duration: const Duration(seconds: 3),
-                    flushbarStyle: FlushbarStyle.FLOATING,
-                    messageText: Text("Playlist already exists",
-                      style: GoogleFonts.montserrat(color: textLight),
-                    ),
-                    margin: const EdgeInsets.all(8),
-                    borderRadius: BorderRadius.circular(8),
-                    backgroundColor: flushBarDark,
-                    messageColor: textLight,
-                    icon: Icon(
-                      Icons.error,
-                      size: 28.0,
-                      color: Colors.red[400],
-                    ),
-                  ).show(context);
-                  debugPrint("Playlist already exists");
-                }
-                else{
-                  userPlaylist.add(Playlist(name: dialogController.text,songs: []));
-                  users[0].playlists++;
-                  Navigator.pop(context);
-                  Flushbar(
-                    flushbarPosition: FlushbarPosition.TOP,
-                    duration: const Duration(seconds: 3),
-                    flushbarStyle: FlushbarStyle.FLOATING,
-                    messageText: Text("Created new playlist named " + dialogController.text,
-                      style: GoogleFonts.montserrat(color: textLight),
-                    ),
-                    margin: const EdgeInsets.all(8),
-                    borderRadius: BorderRadius.circular(8),
-                    backgroundColor: flushBarDark,
-                    messageColor: textLight,
-                    icon: Icon(
-                      Icons.done_rounded,
-                      size: 28.0,
-                      color: Colors.green[400],
-                    ),
-                  ).show(context);
-                }
-                setState(() {});
-                debugPrint(dialogController.text);
-                dialogController.clear();
-              },
-            ),
-          ],
         );
       },
     );
@@ -130,88 +195,127 @@ class _LibraryState extends State<Library> {
         ),
         actions: [
           IconButton(
-            onPressed: (){
+            onPressed: () {
               debugPrint("Before sorting");
-              for (var element in userPlaylist) {
+              for (var element in userPlaylistDemo) {
                 debugPrint(element.name);
               }
               setState(() {
-                userPlaylist.sort((a,b){
-                  return a.name.toString().toLowerCase().compareTo(b.name.toString().toLowerCase());
+                userPlaylistDemo.sort((a, b) {
+                  return a.name
+                      .toString()
+                      .toLowerCase()
+                      .compareTo(b.name.toString().toLowerCase());
                 });
               });
               debugPrint("After sorting");
-              for (var element in userPlaylist) {
+              for (var element in userPlaylistDemo) {
                 debugPrint(element.name);
               }
             },
             icon: Stack(
               children: [
-                Icon(Icons.sort_rounded,color: textLight,),
+                Icon(
+                  Icons.sort_rounded,
+                  color: textLight,
+                ),
                 Positioned(
                   right: -2,
                   bottom: 0,
-                  child: Icon(Icons.south_rounded,color: textLight,size: 15,),
+                  child: Icon(
+                    Icons.south_rounded,
+                    color: textLight,
+                    size: 15,
+                  ),
                 ),
               ],
             ),
           ),
           IconButton(
-              onPressed: (){
-                showCreatePlaylistDialog(context);
-              },
-              icon: Icon(Icons.add,color: textLight,),
+            onPressed: () {
+              showCreatePlaylistDialog(context);
+            },
+            icon: Icon(
+              Icons.add,
+              color: textLight,
+            ),
           ),
         ],
       ),
       backgroundColor: bgDark,
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 8,),
               makeListCard(
-                title: "Liked Songs",
-                numOfSongs: 5,
-                color: Colors.redAccent.shade400,
-                icon: const Icon(Icons.favorite_rounded),
-                func: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (ctx) =>
-                      LikedSongs(songs: player.queue.songs),
-                    )
-                  );
-                }
-              ),
+                  title: "Liked Songs",
+                  numOfSongs: 5,
+                  color: Colors.redAccent.shade400,
+                  icon: const Icon(Icons.favorite_rounded),
+                  func: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (ctx) =>
+                              LikedSongs(songs: player.queue.songs),
+                        ));
+                  }),
               makeListCard(
-                title: "Recently Played",
-                numOfSongs: 10,
-                color: Colors.blueAccent.shade400,
-                icon: const Icon(Icons.history_rounded,),
-                func: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (ctx) =>
-                      RecentlyPlayed(songs: player.queue.songs),
-                    )
-                  );
-                }
+                  title: "Recently Played",
+                  numOfSongs: 10,
+                  color: Colors.blueAccent.shade400,
+                  icon: const Icon(
+                    Icons.history_rounded,
+                  ),
+                  func: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (ctx) =>
+                              RecentlyPlayed(songs: player.queue.songs),
+                        ));
+                  }),
+              const SizedBox(
+                height: 8,
               ),
-              const SizedBox(height: 8,),
-              if(userPlaylist.isNotEmpty) Divider(
-                indent: 10,
-                endIndent: 10,
-                color: textLight,
-              ),
-              const SizedBox(height: 8,),
-              SizedBox(
-                height: 370,
-                child: ListView.builder(
-                  itemCount: userPlaylist.length,
-                  itemBuilder: (context,index){
-                      return makePlaylistCard(plist: userPlaylist[index],);
+              FutureBuilder(
+                future: getUserPlaylists(uid.toString()),
+                builder: (ctx,ss){
+                  if(ss.connectionState == ConnectionState.done){
+                    print("Playlist length = " + playlist.length.toString());
+                    return Column(
+                      children: [
+                        Divider(
+                          indent: 10,
+                          endIndent: 10,
+                          color: textLight,
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        SizedBox(
+                          height: 400,
+                          child: ListView.builder(
+                            itemCount: playlist.length,
+                            itemBuilder: (context, index) {
+                              return makePlaylistCard(
+                                plist: playlist[index],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
                   }
-                ),
+                  if(ss.hasError){
+                    print(ss.error);
+                    return const Center(child: CircularProgressIndicator(color: Colors.red,));
+                  }
+                  return Center(child: CircularProgressIndicator(color: primary,));
+                },
               ),
             ],
           ),
@@ -220,12 +324,12 @@ class _LibraryState extends State<Library> {
     );
   }
 
-  Widget makeListCard({
-    required String title,
-    required Icon icon,
-    required int numOfSongs,
-    required Color color,
-    required Function() func}){
+  Widget makeListCard(
+      {required String title,
+      required Icon icon,
+      required int numOfSongs,
+      required Color color,
+      required Function() func}) {
     return GestureDetector(
       child: SizedBox(
         height: 80,
@@ -238,33 +342,41 @@ class _LibraryState extends State<Library> {
                 height: 60,
                 width: 60,
                 decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [color,color.withOpacity(0.2)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                  gradient: LinearGradient(
+                    colors: [color, color.withOpacity(0.2)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Center(
-                  child: Icon(icon.icon,color: Colors.white,size: 28,),
+                  child: Icon(
+                    icon.icon,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
               ),
-              const SizedBox(width: 20,),
+              const SizedBox(
+                width: 20,
+              ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
+                  Text(
+                    title,
                     style: GoogleFonts.montserrat(
-                        fontSize: 18,
-                        color: textLight,
+                      fontSize: 18,
+                      color: textLight,
                     ),
                   ),
-                  Text(numOfSongs.toString() + " songs",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                  Text(
+                    numOfSongs.toString() + " songs",
+                    style: GoogleFonts.montserrat(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),
@@ -276,9 +388,9 @@ class _LibraryState extends State<Library> {
     );
   }
 
-  Widget makePlaylistCard({required Playlist plist}){
+  Widget makePlaylistCard({required Playlist plist}) {
     String title = plist.name.toString();
-    int numOfSongs = plist.songs!.length;
+    String creationDate = plist.creationDate.toString();
     Icon icon = const Icon(CupertinoIcons.music_note_list);
     Color color = Colors.purple.shade400;
     return GestureDetector(
@@ -295,28 +407,34 @@ class _LibraryState extends State<Library> {
                 width: 60,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [color,color.withOpacity(0.2)],
+                    colors: [color, color.withOpacity(0.2)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
                 child: Center(
-                  child: Icon(icon.icon,color: Colors.white,),
+                  child: Icon(
+                    icon.icon,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              const SizedBox(width: 20,),
+              const SizedBox(
+                width: 20,
+              ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
+                  Text(
+                    title,
                     style: GoogleFonts.montserrat(
                       fontSize: 18,
                       color: textLight,
                     ),
                   ),
-                  Text(numOfSongs.toString() + " songs",
+                  Text(creationDate,
                     style: GoogleFonts.montserrat(
                       fontSize: 14,
                       color: Colors.grey,
@@ -326,20 +444,22 @@ class _LibraryState extends State<Library> {
               ),
               const Spacer(),
               IconButton(
-                  onPressed: (){
+                  onPressed: () {
                     //remove playlist from user list
-                    int index = userPlaylist.indexWhere((element) => element.name == title);
-                    if(index >= 0) {
+                    int index = userPlaylistDemo
+                        .indexWhere((element) => element.name == title);
+                    if (index >= 0) {
                       users[0].playlists--;
-                      userPlaylist.removeAt(index);
+                      userPlaylistDemo.removeAt(index);
                       String msg = title + " removed from your playlists";
                       Flushbar(
                         duration: const Duration(seconds: 3),
                         flushbarPosition: FlushbarPosition.TOP,
                         flushbarStyle: FlushbarStyle.FLOATING,
-                        messageText: Text(msg, style: GoogleFonts.montserrat(
-                          color: textLight
-                        ),),
+                        messageText: Text(
+                          msg,
+                          style: GoogleFonts.montserrat(color: textLight),
+                        ),
                         margin: const EdgeInsets.all(8),
                         borderRadius: BorderRadius.circular(8),
                         backgroundColor: flushBarDark,
@@ -356,24 +476,27 @@ class _LibraryState extends State<Library> {
                     }
                     setState(() {});
                   },
-                  icon: Icon(Icons.delete_outline_outlined,color: textLight,)),
+                  icon: Icon(
+                    Icons.delete_outline_outlined,
+                    color: textLight,
+                  )),
             ],
           ),
         ),
       ),
-      onTap: (){
+      onTap: () {
         // PlaylistPage(title: title);
-        Helpers().getData("hailee").then((value) {
-          Navigator.push(context, MaterialPageRoute(builder: (ctx) =>
-              PlaylistPage(playlist: plist,songs: value.data!,))
-          );
-        });
+        //Helpers().getData("hailee").then((value) {
+        //   Navigator.push(
+        //       context,
+        //       MaterialPageRoute(
+        //           builder: (ctx) => PlaylistPage(
+        //                 playlist: plist,
+        //                 songs: value.data!,
+        //               )));
+        // });
         debugPrint(title);
       },
     );
   }
-
 }
-
-
-

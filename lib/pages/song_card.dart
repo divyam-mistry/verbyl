@@ -5,6 +5,7 @@ import 'package:verbyl_project/models/song.dart';
 import 'package:verbyl_project/pages/artistPage.dart';
 import 'package:verbyl_project/pages/music_player.dart';
 import 'package:verbyl_project/services/helpers.dart';
+import '../services/data.dart';
 import '../theme.dart';
 
 class SongCard extends StatefulWidget {
@@ -110,12 +111,43 @@ class _SongCardState extends State<SongCard> {
                 ],
               ),
               const Spacer(),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.more_vert,
-                  color: textLight,
-                ),
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert,color: textLight,),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'View Artist':
+                      print("View Artist");
+                      Helpers()
+                          .getArtistData(widget.songs.artist!.name.toString())
+                          .then((value) => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (ctx) => ArtistPage(
+                              artistData: value,
+                              i: 0,
+                            ),
+                          ),
+                        )
+                      });
+                      break;
+                    case 'Add to Queue':
+                      print("Add to Queue");
+                      player.queue.addSong(widget.songs);
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return {
+                    'View Artist',
+                    'Add to Queue',
+                  }.map((String choice) {
+                    return PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(choice),
+                    );
+                  }).toList();
+                },
               ),
               const SizedBox(
                 width: 10,
@@ -219,12 +251,45 @@ class _ChartSongCardState extends State<ChartSongCard> {
                 ],
               ),
               const Spacer(),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.more_vert,
-                  color: textLight,
-                ),
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert,color: textLight,),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'View Artist':
+                      print("View Artist");
+                      Helpers()
+                          .getArtistData(widget.shazamSongData.subtitle.toString())
+                          .then((value) => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (ctx) => ArtistPage(
+                              artistData: value,
+                              i: 0,
+                            ),
+                          ),
+                        )
+                      });
+                      break;
+                    case 'Add to Queue':
+                      Helpers().getData(widget.shazamSongData.title.toString()).then((value){
+                        player.queue.addSong(value.data![0]);
+                      });
+                      print("Add to Queue");
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return {
+                    'View Artist',
+                    'Add to Queue',
+                  }.map((String choice) {
+                    return PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(choice),
+                    );
+                  }).toList();
+                },
               ),
               const SizedBox(
                 width: 10,
@@ -331,13 +396,6 @@ class _ArtistCardState extends State<ArtistCard> {
                 ],
               ),
               const Spacer(),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.more_vert,
-                  color: textLight,
-                ),
-              ),
               const SizedBox(
                 width: 10,
               ),

@@ -10,6 +10,7 @@ import 'package:verbyl_project/models/authentication_controller.dart';
 import 'package:verbyl_project/models/music_player.dart';
 import 'package:verbyl_project/models/user.dart';
 import 'package:verbyl_project/services/data.dart';
+import 'package:verbyl_project/services/location.dart';
 import '/theme.dart';
 import 'authentication/login_email.dart';
 import 'models/charts.dart';
@@ -101,9 +102,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 4), () => Navigator.of(context).pushReplacement(
-       MaterialPageRoute(builder: (context) => const AuthenticationWrapper()))
-    );
+    Timer(const Duration(seconds: 2), (){
+      getLocation().then((value){
+        verbylUserLocation = value.address;
+        isLocationPermissionDenied = value.isLocationDenied;
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const AuthenticationWrapper())
+        );
+      });
+    });
   }
 
   @override

@@ -5,11 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:music_visualizer/music_visualizer.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:verbyl_project/models/playlist.dart';
 import 'package:verbyl_project/models/song.dart';
 import 'package:verbyl_project/pages/artistPage.dart';
 import 'package:verbyl_project/pages/playing_queue.dart';
 import 'package:verbyl_project/theme.dart';
 
+import '../services/data.dart';
 import '../services/helpers.dart';
 
 class MusicPlayer extends StatefulWidget {
@@ -90,7 +92,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
     );
     setState(() {
       //appbar = PaletteColor(generator.vibrantColor!.color, 2);
-      if(generator.vibrantColor != null) {
+      if (generator.vibrantColor != null) {
         dark = PaletteColor(generator.vibrantColor!.color, 2);
       } else {
         dark = PaletteColor(generator.darkMutedColor!.color, 2);
@@ -105,6 +107,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
       mood = value.toString().toUpperCase();
     });
   }
+
+  late Map<dynamic, bool> playlistCheckBox = {};
 
   @override
   void initState() {
@@ -182,24 +186,152 @@ class _MusicPlayerState extends State<MusicPlayer> {
             ),
             actions: [
               PopupMenuButton<String>(
-                onSelected: (value){
+                onSelected: (value) {
                   switch (value) {
                     case 'View Artist':
                       print("View Artist");
-                      Helpers().getArtistData(
-                        player.queue.songs[player.queue.currentIndex].artist!.name!.toString()
-                      ).then((value) => {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (ctx) => ArtistPage(
-                                  artistData: value,
-                                  i: 0,
-                                ))
-                        )});
+                      Helpers()
+                          .getArtistData(player.queue
+                              .songs[player.queue.currentIndex].artist!.name!
+                              .toString())
+                          .then((value) => {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (ctx) => ArtistPage(
+                                      artistData: value,
+                                      i: 0,
+                                    ),
+                                  ),
+                                )
+                              });
                       break;
                     case 'Add to playlist':
                       print("Add to playlist");
+                      playlistCheckBox = {};
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (c) {
+                          return Container(
+                              color: bgDark.withOpacity(0.95),
+                              child: StatefulBuilder(
+                                builder: (ctx, setModalState) {
+                                  return SizedBox(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Row(
+                                          //   mainAxisAlignment:
+                                          //       MainAxisAlignment.spaceBetween,
+                                          //   crossAxisAlignment:
+                                          //       CrossAxisAlignment.center,
+                                          //   children: [
+                                          //     Text(
+                                          //       "  Add to playlist",
+                                          //       style: GoogleFonts.montserrat(
+                                          //         fontSize: 18,
+                                          //         color: textLight,
+                                          //       ),
+                                          //     ),
+                                          //     IconButton(
+                                          //       onPressed: () {
+                                          //         Navigator.pop(context);
+                                          //       },
+                                          //       icon: Icon(
+                                          //         Icons.cancel_rounded,
+                                          //         color: textLight,
+                                          //         size: 26,
+                                          //       ),
+                                          //     ),
+                                          //   ],
+                                          // ),
+                                          SizedBox(
+                                            height: 300,
+                                            child: FutureBuilder(
+                                              future: getUserPlaylists(
+                                                  uid.toString()),
+                                              builder: (ctx, ss) {
+                                                if (ss.connectionState ==
+                                                    ConnectionState.done) {
+                                                  print("Playlist length = " +
+                                                      playlist.length.toString());
+                                                  for(Playlist p in playlist){
+                                                    playlistCheckBox.putIfAbsent(p, () => false);
+                                                  }
+                                                  return makeAddToPlaylistCard();
+                                                }
+                                                if (ss.hasError) {
+                                                  print(ss.error);
+                                                  return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                    color: Colors.red,
+                                                  ));
+                                                }
+                                                return Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                  color: primary,
+                                                ));
+                                              },
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                            children: [
+                                              SizedBox(
+                                                height: 45,
+                                                width: 0.3 * size.width,
+                                                child: TextButton(
+                                                  style: TextButton.styleFrom(
+                                                    backgroundColor: textLight.withOpacity(0.8),
+                                                  ),
+                                                  onPressed: () {
+                                                    playlistCheckBox = {};
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text("CANCEL",
+                                                    style: GoogleFonts.montserrat(
+                                                      color: primary,
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 45,
+                                                width: 0.5 * size.width,
+                                                child: TextButton(
+                                                  style: TextButton.styleFrom(
+                                                    backgroundColor: primary,
+                                                  ),
+                                                  onPressed: (){},
+                                                  child: Text("ADD TO PLAYLIST",
+                                                    style: GoogleFonts.montserrat(
+                                                      color: textLight,
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10,),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                        }
+                      );
                       break;
                   }
                 },
@@ -230,50 +362,52 @@ class _MusicPlayerState extends State<MusicPlayer> {
               // const SizedBox(height: 20,),
               mood.isNotEmpty
                   ? Container(
-                height: 40,
-                width: 0.8 * size.width,
-                color: dark.color,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      CupertinoIcons.wand_stars_inverse,
-                      color: textLight,
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      mood,
-                      style: GoogleFonts.montserrat(
-                          fontSize: 20, color: textLight),
-                    ),
-                  ],
-                ),
-              )
+                      height: 40,
+                      width: 0.8 * size.width,
+                      color: dark.color,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            CupertinoIcons.wand_stars_inverse,
+                            color: textLight,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            mood,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 20,
+                              color: textLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   : SizedBox(
-                height: 40,
-                width: 60,
-                child: Center(
-                  child: SizedBox(
-                    height: 30,
-                    child: MusicVisualizer(
-                      barCount: 5,
-                      colors: [
-                        Colors.white,
-                        Colors.purpleAccent.shade400,
-                        Colors.white,
-                        Colors.purpleAccent.shade400,
-                        Colors.white
-                      ],
-                      duration: const [900, 700, 600, 800, 500],
+                      height: 40,
+                      width: 60,
+                      child: Center(
+                        child: SizedBox(
+                          height: 30,
+                          child: MusicVisualizer(
+                            barCount: 5,
+                            colors: [
+                              Colors.white,
+                              Colors.purpleAccent.shade400,
+                              Colors.white,
+                              Colors.purpleAccent.shade400,
+                              Colors.white
+                            ],
+                            duration: const [900, 700, 600, 800, 500],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
               const SizedBox(
-                height: 30,
+                height: 40,
               ),
               musicPlayerControls(
                   song: player.queue.songs[player.queue.currentIndex]),
@@ -459,14 +593,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
       child: Column(
         children: [
           const SizedBox(
-            height: 20,
+            height: 30,
           ),
           songDetails(song: player.queue.songs[player.queue.currentIndex]),
           const SizedBox(
             height: 15,
-          ),
-          const SizedBox(
-            height: 10,
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -531,7 +662,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             height: 10,
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -692,7 +823,33 @@ class _MusicPlayerState extends State<MusicPlayer> {
       ),
     );
   }
+
+  Widget makeAddToPlaylistCard() {
+    return StatefulBuilder(
+        builder: (BuildContext ctx, StateSetter setRecommendState) {
+      return SizedBox(
+        height: 400,
+        child: Column(
+          children: playlistCheckBox.keys
+              .map((e) => Theme(
+                    data: Theme.of(ctx).copyWith(
+                      unselectedWidgetColor: textLight,
+                    ),
+                    child: CheckboxListTile(
+                        contentPadding: const EdgeInsets.fromLTRB(25, 0, 15, 0),
+                        title: Text(e.name.toString(),style: GoogleFonts.montserrat(
+                          color: textLight,
+                        ),),
+                        value: playlistCheckBox[e],
+                        onChanged: (bool? value) {
+                          setRecommendState(() {
+                            playlistCheckBox[e] = value!;
+                          });
+                        }),
+                  ))
+              .toList(),
+        ),
+      );
+    });
+  }
 }
-
-
-

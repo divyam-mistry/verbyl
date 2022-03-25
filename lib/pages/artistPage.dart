@@ -30,17 +30,21 @@ class _ArtistPageState extends State<ArtistPage> {
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              pinned: true,
+              pinned: false,
               flexibleSpace: FlexibleSpaceBar(
                 title: Row(
                   children: [
-                    Text(
-                        widget.artistData.artistName.toString(),
-                        style: GoogleFonts.montserrat(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: textLight,
-                        ) //TextStyle
+                    SizedBox(
+                      width: 140,
+                      child: Text(
+                          widget.artistData.artistName.toString(),
+                          overflow: TextOverflow.clip,
+                          style: GoogleFonts.montserrat(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: textLight,
+                          ) //TextStyle
+                      ),
                     ),
                     const SizedBox(width: 5,),
                     Icon(Icons.verified_rounded,color: Colors.purple.shade300,size: 20,),
@@ -82,12 +86,6 @@ class _ArtistPageState extends State<ArtistPage> {
                   Navigator.pop(context);
                 },
               ), //IconButton
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () {},
-                ), //IconButton
-              ], //<Widget>[]
             ),
             SliverToBoxAdapter(
               child: Padding(

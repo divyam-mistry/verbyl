@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocode/geocode.dart';
+import 'package:verbyl_project/services/data.dart';
 
 class PositionAndBool {
   final Position position;
@@ -46,6 +47,9 @@ Future<PositionAndBool> _determinePosition() async {
 Future<StringAndBool> getLocation() async {
   String address = "";
   bool b = true;
+  if(verbylUserLocation.isNotEmpty && isLocationPermissionDenied){
+    return StringAndBool(verbylUserLocation, false);
+  }
   try{
     GeoCode geoCode = GeoCode();
     PositionAndBool positionAndBool = await _determinePosition();

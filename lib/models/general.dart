@@ -31,16 +31,16 @@ class Song {
   String imageLink;
 }
 
-class Playlist {
+class PlaylistDemo {
   String name;
   List<Song>? songs;
-  Playlist({this.name = "",this.songs});
+  PlaylistDemo({this.name = "",this.songs});
 
 //List<Song> songs = List<Song>.empty(growable: true);
 }
 
-List<Playlist> userPlaylist = [
-  Playlist(
+List<PlaylistDemo> userPlaylistDemo = [
+  PlaylistDemo(
       name: "LOFI Songs",
       songs: [
         Song(name: "Levitating",imageLink: ""),
@@ -48,7 +48,7 @@ List<Playlist> userPlaylist = [
         Song(name: "Mood",imageLink: ""),
       ]
   ),
-  Playlist(
+  PlaylistDemo(
       name: "Playlist 1",
       songs: [
         Song(name: "Levitating",imageLink: ""),
@@ -56,7 +56,7 @@ List<Playlist> userPlaylist = [
         Song(name: "Mood",imageLink: ""),
       ]
   ),
-  Playlist(
+  PlaylistDemo(
       name: "Playlist 2",
       songs: [
         Song(name: "Levitating",imageLink: ""),
