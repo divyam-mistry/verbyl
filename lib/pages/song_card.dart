@@ -182,12 +182,15 @@ class _ChartSongCardState extends State<ChartSongCard> {
       onTap: () async {
         await Helpers()
             .getData(widget.shazamSongData.title.toString())
-            .then((value) => {
+            .then((value){
+                  player.queue.loadSoloTrack(value.data![0]);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (ctx) => MusicPlayer()))
-                });
+                          builder: (ctx) => MusicPlayer()));
+                }).onError((error, stackTrace){
+                  print("Error" + error.toString());
+        });
       },
       child: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -411,7 +414,8 @@ class _ArtistCardState extends State<ArtistCard> {
 
 class LikedSongCard extends StatefulWidget {
   final Datum songs;
-  const LikedSongCard({Key? key, required this.songs}) : super(key: key);
+  final StateSetter likeSongStateSetter;
+  const LikedSongCard({Key? key, required this.songs, required this.likeSongStateSetter}) : super(key: key);
 
   @override
   _LikedSongCardState createState() => _LikedSongCardState();
@@ -424,6 +428,7 @@ class _LikedSongCardState extends State<LikedSongCard> {
     String imageUrl = widget.songs.album!.cover.toString();
     return GestureDetector(
       onTap: () {
+        player.queue.loadSoloTrack(widget.songs);
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -512,9 +517,13 @@ class _LikedSongCardState extends State<LikedSongCard> {
               ),
               const Spacer(),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  widget.likeSongStateSetter(() {
+                    unlikeSong(widget.songs.id.toString());
+                  });
+                },
                 icon: Icon(
-                  Icons.favorite_rounded,
+                  Icons.remove_circle_outline,
                   color: textLight,
                 ),
               ),

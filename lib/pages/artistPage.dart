@@ -7,6 +7,8 @@ import 'package:verbyl_project/pages/mini_music_player.dart';
 import 'package:verbyl_project/pages/song_card.dart';
 import 'package:verbyl_project/theme.dart';
 
+import '../services/data.dart';
+
 class ArtistPage extends StatefulWidget {
   final ArtistData artistData;
   final int i;
@@ -103,6 +105,11 @@ class _ArtistPageState extends State<ArtistPage> {
                             setState(() {
                               following = !following;
                             });
+                            if(following) followArtist(
+                              widget.artistData.artistId.toString(),
+                              widget.artistData.artistName.toString(),
+                            );
+                            else unfollowArtist(widget.artistData.artistId.toString());
                           },
                           child: SizedBox(
                             height: 40,

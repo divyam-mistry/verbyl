@@ -19,13 +19,6 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
 
-  final List<SongsDataMoods> songDataMoods = [
-    SongsDataMoods("Calm",9),
-    SongsDataMoods("Energetic",4),
-    SongsDataMoods("Happy",7),
-    SongsDataMoods("Sad",12),
-  ];
-
   @override
   void initState() {
     getUserData(authenticationController.userEmail).then((value){
@@ -36,15 +29,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    List<charts.Series<SongsDataMoods,String>> series = [
-      charts.Series(
-        data: songDataMoods,
-        id: "Songs By Mood",
-        domainFn: (SongsDataMoods s, _) => s.mood,
-        measureFn: (SongsDataMoods s, _) => s.numberOfSongs,
-        colorFn: (_, __) => charts.MaterialPalette.purple.shadeDefault,
-      ),
-    ];
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: bgDark,
@@ -152,44 +136,41 @@ class _ProfileState extends State<Profile> {
                                 ],
                               ),
                               const SizedBox(
-                                height: 10,
+                                height: 15,
                               ),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.people_rounded,
-                                    color: Colors.purple.shade200,
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  Text(
-                                    users[0].followingArtists.toString(),
-                                    style: GoogleFonts.montserrat(
-                                      color: textLight,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  Icon(
-                                    Icons.queue_music_rounded,
-                                    color: Colors.purple.shade200,
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  Text(
-                                    users[0].playlists.toString(),
-                                    style: GoogleFonts.montserrat(
-                                      color: textLight,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 5,
-                              ),
+                              // Row(
+                              //   children: [
+                              //     Icon(
+                              //       Icons.people_rounded,
+                              //       color: Colors.purple.shade200,
+                              //     ),
+                              //     const SizedBox(
+                              //       width: 5,
+                              //     ),
+                              //     Text(
+                              //       users[0].followingArtists.toString(),
+                              //       style: GoogleFonts.montserrat(
+                              //         color: textLight,
+                              //       ),
+                              //     ),
+                              //     const SizedBox(
+                              //       width: 20,
+                              //     ),
+                              //     Icon(
+                              //       Icons.queue_music_rounded,
+                              //       color: Colors.purple.shade200,
+                              //     ),
+                              //     const SizedBox(
+                              //       width: 5,
+                              //     ),
+                              //     Text(
+                              //       users[0].playlists.toString(),
+                              //       style: GoogleFonts.montserrat(
+                              //         color: textLight,
+                              //       ),
+                              //     ),
+                              //   ],
+                              // ),
                             ],
                           ),
                         ],
@@ -474,20 +455,51 @@ class _ProfileState extends State<Profile> {
               const SizedBox(
                 height: 15,
               ),
-              Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Container(
-                  height: 0.3 * size.height,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.purple.shade200,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: charts.BarChart(series),
-                  ),
-                ),
+              FutureBuilder(
+                future: getMoodStats(),
+                  builder: (ctx,ss) {
+                if(ss.hasData && ss.connectionState == ConnectionState.done){
+                  List<int> list = ss.data as List<int>;
+                  List<SongsDataMoods> songDataMoods = [
+                    SongsDataMoods("Happy",list[0]),
+                    SongsDataMoods("Energetic",list[1]),
+                    SongsDataMoods("Calm",list[2]),
+                    SongsDataMoods("Sad",list[3]),
+                  ];
+                  // for(int i=0; i<4; i++){
+                  //   songDataMoods[i].numberOfSongs = list[i];
+                  // }
+                  List<charts.Series<SongsDataMoods,String>> series = [
+                    charts.Series(
+                      data: songDataMoods,
+                      id: "Songs By Mood",
+                      domainFn: (SongsDataMoods s, _) => s.mood,
+                      measureFn: (SongsDataMoods s, _) => s.numberOfSongs,
+                      colorFn: (_, __) => charts.MaterialPalette.purple.shadeDefault,
+                    ),
+                  ];
+                  return Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Container(
+                      height: 0.3 * size.height,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.purple.shade200,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: charts.BarChart(series),
+                      ),
+                    ),
+                  );
+                }
+                else if(ss.hasError) {
+                  print(ss.error);
+                  return Center(child: CircularProgressIndicator(color: Colors.red,));
+                }
+                return SizedBox();
+              }
               ),
             ],
           ),
@@ -499,7 +511,7 @@ class _ProfileState extends State<Profile> {
 
 class SongsDataMoods{
   final String mood;
-  final int numberOfSongs;
+  late final int numberOfSongs;
   SongsDataMoods(this.mood,this.numberOfSongs);
 }
 

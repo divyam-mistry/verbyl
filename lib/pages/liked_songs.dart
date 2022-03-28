@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:verbyl_project/pages/song_card.dart';
+import 'package:verbyl_project/services/data.dart';
 import '../models/song.dart';
 import '../theme.dart';
 import 'mini_music_player.dart';
 
 class LikedSongs extends StatefulWidget {
-  List<Datum> songs;
-  LikedSongs({Key? key,required this.songs}) : super(key: key);
+  LikedSongs({Key? key}) : super(key: key);
 
   @override
   _LikedSongsState createState() => _LikedSongsState();
@@ -56,22 +56,31 @@ class _LikedSongsState extends State<LikedSongs> {
               onPressed: () {
                 Navigator.pop(context);
               },
-            ), //IconButton
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: () {},
-              ), //IconButton
-            ], //<Widget>[]
+            ),//<Widget>[]
           ), //SliverAppBar
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (context, index) => LikedSongCard(
-                songs: widget.songs[index],
+            delegate: SliverChildListDelegate([
+              SizedBox(
+                height: 500,
+                child: FutureBuilder(
+                    future: getLikedSongs(),
+                    builder: (ctx, ss) {
+                      if(ss.hasData && ss.connectionState == ConnectionState.done){
+                        List<Datum> songList = ss.data as List<Datum>;
+                        return ListView.builder(
+                          itemBuilder: (context, index) {
+                              return LikedSongCard(songs: songList[index], likeSongStateSetter: setState);
+                            },
+                            itemCount: songList.length,
+                        );
+                      }
+                      if(ss.hasError) return Center(child: CircularProgressIndicator(color: Colors.red,));
+                      return Center(child: CircularProgressIndicator(color: primary,));
+                    },
+                ),
               ),
-              childCount: widget.songs.length,
-            ),
-          )
+            ]),
+          ),
         ],
       ),
     ));

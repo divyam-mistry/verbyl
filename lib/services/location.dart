@@ -16,7 +16,7 @@ class StringAndBool {
 }
 
 //bool isLocationDenied = false;
-String address = "";
+// String address = "";
 
 Future<PositionAndBool> _determinePosition() async {
   bool isLocationDenied = false;
@@ -47,9 +47,9 @@ Future<PositionAndBool> _determinePosition() async {
 Future<StringAndBool> getLocation() async {
   String address = "";
   bool b = true;
-  if(verbylUserLocation.isNotEmpty && isLocationPermissionDenied){
-    return StringAndBool(verbylUserLocation, false);
-  }
+  // if(verbylUserLocation != "" && isLocationPermissionDenied){
+  //   return StringAndBool(verbylUserLocation, false);
+  // }
   try{
     GeoCode geoCode = GeoCode();
     PositionAndBool positionAndBool = await _determinePosition();
@@ -59,11 +59,14 @@ Future<StringAndBool> getLocation() async {
     );
     b = positionAndBool.isLocationDenied;
     address = adr.region!;
+    await uploadCity(address).then((value){
+      return StringAndBool(address,b);
+    });
     debugPrint(adr.toString());
     return StringAndBool(address,b);
   }
   catch(e){
-    print("Location services are disabled");
+    //print("Location services are disabled");
     print(e);
   }
   return StringAndBool(address,b);

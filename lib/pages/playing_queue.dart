@@ -95,8 +95,11 @@ class _PlayingQueuePageState extends State<PlayingQueuePage> {
                                 color: Colors.black54,
                                 height: 50,
                                 width: 50,
-                                child: Image.network(
-                                    "https://m.media-amazon.com/images/G/01/digital/music/player/web/sixteen_frame_equalizer_accent.gif"),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.network(
+                                      "https://m.media-amazon.com/images/G/01/digital/music/player/web/sixteen_frame_equalizer_accent.gif"),
+                                ),
                               ),
                             )
                           : const SizedBox(),
@@ -117,52 +120,52 @@ class _PlayingQueuePageState extends State<PlayingQueuePage> {
                             ),
                             textAlign: TextAlign.start,
                           ),
-                        ) : const SizedBox(),
-                      // : Padding(
-                      //     padding: const EdgeInsets.symmetric(
-                      //         vertical: 10, horizontal: 20),
-                      //     child: Row(
-                      //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //       crossAxisAlignment: CrossAxisAlignment.center,
-                      //       children: [
-                      //         Text(
-                      //           "RECOMMENDED",
-                      //           style: GoogleFonts.montserrat(
-                      //             fontSize: 16,
-                      //             color: textLight,
-                      //           ),
-                      //           textAlign: TextAlign.start,
-                      //         ),
-                      //         TextButton(
-                      //           onPressed: () {
-                      //             List<Datum> list = [];
-                      //             songCheckBox.forEach((key, value) {
-                      //               if (value) list.add(key);
-                      //             });
-                      //             setState(() {
-                      //               player.queue.addSongs(list);
-                      //             });
-                      //           },
-                      //           child: Container(
-                      //             height: 30,
-                      //             width: 60,
-                      //             decoration: BoxDecoration(
-                      //               border: Border.all(
-                      //                   color: Colors.purpleAccent.shade100),
-                      //             ),
-                      //             child: Center(
-                      //               child: Text(
-                      //                 "ADD",
-                      //                 style: TextStyle(
-                      //                   color: Colors.purpleAccent.shade100,
-                      //                 ),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "RECOMMENDED",
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 16,
+                                  color: textLight,
+                                ),
+                                textAlign: TextAlign.start,
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  List<Datum> list = [];
+                                  songCheckBox.forEach((key, value) {
+                                    if (value) list.add(key);
+                                  });
+                                  setState(() {
+                                    player.queue.addSongs(list);
+                                  });
+                                },
+                                child: Container(
+                                  height: 30,
+                                  width: 60,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.purpleAccent.shade100),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "ADD",
+                                      style: TextStyle(
+                                        color: Colors.purpleAccent.shade100,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                 ],
               ),
             ),
@@ -181,77 +184,77 @@ class _PlayingQueuePageState extends State<PlayingQueuePage> {
                               1,
                     ),
                   )
-                // : SliverList(
-                //     delegate: SliverChildListDelegate([
-                //       SizedBox(
-                //         child: FutureBuilder(
-                //             future: Helpers().getRecommendedSongs(
-                //                 player.queue.songs[player.queue.currentIndex]
-                //                     .title
-                //                     .toString(),
-                //                 player.queue.songs[player.queue.currentIndex]
-                //                     .artist!.name
-                //                     .toString()),
-                //             builder: (ctx, ss) {
-                //               if (ss.connectionState == ConnectionState.done &&
-                //                   ss.hasData) {
-                //                 List<Datum?> list = ss.data as List<Datum?>;
-                //                 for (var s in list) {
-                //                   songCheckBox.putIfAbsent(s, () => false);
-                //                 }
-                //                 // return ListView.builder(
-                //                 //   itemBuilder: (context, index) {
-                //                 //       return Row(
-                //                 //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //                 //         children: [
-                //                 //           RecommendedSongs(
-                //                 //               shazamSongData: list[index]!
-                //                 //           ),
-                //                 //           Checkbox(value: false, onChanged: (){}),
-                //                 //         ],
-                //                 //       );
-                //                 //     },
-                //                 //     itemCount: list.length,
-                //                 // );
-                //                 return StatefulBuilder(builder:
-                //                     (BuildContext ctx,
-                //                         StateSetter setRecommendState) {
-                //                   return Column(
-                //                     children: songCheckBox.keys
-                //                         .map((e) => Theme(
-                //                               data: Theme.of(context).copyWith(
-                //                                 unselectedWidgetColor:
-                //                                     textLight,
-                //                               ),
-                //                               child: CheckboxListTile(
-                //                                   contentPadding:
-                //                                       const EdgeInsets.fromLTRB(
-                //                                           0, 0, 25, 0),
-                //                                   title: RecSongCard(
-                //                                     songs: e,
-                //                                   ),
-                //                                   value: songCheckBox[e],
-                //                                   onChanged: (bool? value) {
-                //                                     setRecommendState(() {
-                //                                       songCheckBox[e] = value!;
-                //                                     });
-                //                                   }),
-                //                             ))
-                //                         .toList(),
-                //                   );
-                //                 });
-                //               } else {
-                //                 return Center(
-                //                   child: CircularProgressIndicator(
-                //                     color: primary,
-                //                   ),
-                //                 );
-                //               }
-                //             }),
-                //       ),
-                //     ]),
-                //   ),
-                : const SliverToBoxAdapter(child: SizedBox(),),
+                : SliverList(
+                    delegate: SliverChildListDelegate([
+                      SizedBox(
+                        child: FutureBuilder(
+                            future: Helpers().getRecommendedSongs(
+                                player.queue.songs[player.queue.currentIndex]
+                                    .title
+                                    .toString(),
+                                player.queue.songs[player.queue.currentIndex]
+                                    .artist!.name
+                                    .toString()),
+                            builder: (ctx, ss) {
+                              if (ss.connectionState == ConnectionState.done &&
+                                  ss.hasData) {
+                                List<Datum?> list = ss.data as List<Datum?>;
+                                for (var s in list) {
+                                  songCheckBox.putIfAbsent(s, () => false);
+                                }
+                                // return ListView.builder(
+                                //   itemBuilder: (context, index) {
+                                //       return Row(
+                                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                //         children: [
+                                //           RecommendedSongs(
+                                //               shazamSongData: list[index]!
+                                //           ),
+                                //           Checkbox(value: false, onChanged: (){}),
+                                //         ],
+                                //       );
+                                //     },
+                                //     itemCount: list.length,
+                                // );
+                                return StatefulBuilder(builder:
+                                    (BuildContext ctx,
+                                        StateSetter setRecommendState) {
+                                  return Column(
+                                    children: songCheckBox.keys
+                                        .map((e) => Theme(
+                                              data: Theme.of(context).copyWith(
+                                                unselectedWidgetColor:
+                                                    textLight,
+                                              ),
+                                              child: CheckboxListTile(
+                                                  contentPadding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          0, 0, 25, 0),
+                                                  title: RecSongCard(
+                                                    songs: e,
+                                                  ),
+                                                  value: songCheckBox[e],
+                                                  onChanged: (bool? value) {
+                                                    setRecommendState(() {
+                                                      songCheckBox[e] = value!;
+                                                    });
+                                                  }),
+                                            ))
+                                        .toList(),
+                                  );
+                                });
+                              } else {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: primary,
+                                  ),
+                                );
+                              }
+                            }),
+                      ),
+                    ]),
+                  ),
+                // : const SliverToBoxAdapter(child: SizedBox(),),
           ],
         ),
       ),

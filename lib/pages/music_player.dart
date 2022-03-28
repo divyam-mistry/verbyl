@@ -22,6 +22,8 @@ class MusicPlayer extends StatefulWidget {
   _MusicPlayerState createState() => _MusicPlayerState();
 }
 
+// bool isLoading = true;
+
 class _MusicPlayerState extends State<MusicPlayer> {
   // AudioPlayer audioPlayer = AudioPlayer();
   // Duration duration = const Duration();
@@ -43,7 +45,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
           player.isPlaying = false;
         });
       }
-    } else {
+    }
+    else {
       print("Song Playing");
       var res = await player.audioPlayer.play(url, isLocal: true);
       if (res == 1) {
@@ -65,12 +68,30 @@ class _MusicPlayerState extends State<MusicPlayer> {
     });
     print("ff");
     print(player.position);
-    if (player.duration.inSeconds == player.position.inSeconds) {
-      player.position = Duration(seconds: 0);
-      print("Song Ended");
-      print(player.position);
-      return;
-    }
+    // if(player.position.inSeconds >= 28){
+    //   player.audioPlayer.onPlayerCompletion.listen((event) {
+    //     print("Next song started");
+    //     player.isPlaying = true;
+    //     if (player.playNext()) {
+    //       getAudio(true);
+    //       _updatePalette();
+    //       setState(() {});
+    //       // testFunction().then((value){isLoading = false;});
+    //     } else {
+    //       getAudio(false);
+    //       _updatePalette();
+    //       setState(() {});
+    //       // testFunction().then((value){isLoading = false;});
+    //     }
+    //   });
+    // }
+    // if (player.duration.inSeconds == player.position.inSeconds) {
+    //   player.position = Duration(seconds: 0);
+    //   print(player.position);
+    //   setState(() {
+    //     print("Song Ended");
+    //   });
+    // }
   }
 
   // late Duration _visibleValue;
@@ -84,11 +105,10 @@ class _MusicPlayerState extends State<MusicPlayer> {
   _updatePalette() async {
     color = PaletteColor(primary, 2);
     dark = PaletteColor(primary, 2);
-    print("player.queue.currentIndex from _updatePalette");
+    print("_updatePalette starts");
     print(player.queue.currentIndex);
     final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
-      NetworkImage(player.queue.songs[player.queue.currentIndex].album!.coverBig
-          .toString()),
+      NetworkImage(player.queue.songs[player.queue.currentIndex].album!.coverBig.toString()),
     );
     setState(() {
       //appbar = PaletteColor(generator.vibrantColor!.color, 2);
@@ -99,9 +119,17 @@ class _MusicPlayerState extends State<MusicPlayer> {
       }
       color = PaletteColor(generator.dominantColor!.color, 2);
     });
+    Helpers().predictMood(
+        player.queue.songs[player.queue.currentIndex].title.toString(),
+        player.queue.songs[player.queue.currentIndex].id.toString()
+    ).then((value){
+      setMood(value);
+      addSongToRecentlyPlayed(player.queue.songs[player.queue.currentIndex], cityId, value, DateTime.now());
+    });
+    print("_updatePalette ends");
   }
 
-  String mood = "HAPPY";
+  String mood = "Loading...";
   void setMood(String value) {
     setState(() {
       mood = value.toString().toUpperCase();
@@ -114,11 +142,18 @@ class _MusicPlayerState extends State<MusicPlayer> {
   void initState() {
     setState(() {
       _updatePalette();
+      //testFunction().then((value){isLoading = false;});
     });
-    //getAudio();
     // API Hard limit - 100 (uncomment when presenting)
     //Helpers().predictMood(widget.song.title.toString()).then((value) => setMood(value));
     super.initState();
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    if(mounted){
+      super.setState(fn);
+    }
   }
 
   @override
@@ -311,7 +346,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                                   style: TextButton.styleFrom(
                                                     backgroundColor: primary,
                                                   ),
-                                                  onPressed: (){},
+                                                  onPressed: (){
+                                                    List<Playlist> playlists = [];
+                                                    playlistCheckBox.forEach((key, value) {
+                                                      if(value) playlists.add(key);
+                                                    });
+                                                    addSongToPlaylists(player.queue.songs[player.queue.currentIndex], playlists).then((value){
+                                                      Navigator.of(context).pop();
+                                                    });
+                                                  },
                                                   child: Text("ADD TO PLAYLIST",
                                                     style: GoogleFonts.montserrat(
                                                       color: textLight,
@@ -354,63 +397,135 @@ class _MusicPlayerState extends State<MusicPlayer> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(
-                height: 40,
+                height: 45,
               ),
               songImage(player
                   .queue.songs[player.queue.currentIndex].album!.coverBig
                   .toString()),
-              // const SizedBox(height: 20,),
-              mood.isNotEmpty
-                  ? Container(
-                      height: 40,
-                      width: 0.8 * size.width,
-                      color: dark.color,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            CupertinoIcons.wand_stars_inverse,
-                            color: textLight,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            mood,
-                            style: GoogleFonts.montserrat(
-                              fontSize: 20,
-                              color: textLight,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : SizedBox(
-                      height: 40,
-                      width: 60,
-                      child: Center(
-                        child: SizedBox(
-                          height: 30,
-                          child: MusicVisualizer(
-                            barCount: 5,
-                            colors: [
-                              Colors.white,
-                              Colors.purpleAccent.shade400,
-                              Colors.white,
-                              Colors.purpleAccent.shade400,
-                              Colors.white
-                            ],
-                            duration: const [900, 700, 600, 800, 500],
-                          ),
-                        ),
+              Container(
+                height: 40,
+                width: 0.8 * size.width,
+                color: dark.color,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      CupertinoIcons.wand_stars_inverse,
+                      color: textLight,
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      mood,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 20,
+                        color: textLight,
                       ),
                     ),
-              const SizedBox(
-                height: 40,
+                  ],
+                ),
               ),
-              musicPlayerControls(
-                  song: player.queue.songs[player.queue.currentIndex]),
+              // const SizedBox(height: 20,)
+              // mood.isNotEmpty
+              //     // ? predictedMood()
+              // ? Container(
+              //     height: 40,
+              //     width: 0.8 * size.width,
+              //     color: dark.color,
+              //     child: Row(
+              //       mainAxisAlignment: MainAxisAlignment.center,
+              //       crossAxisAlignment: CrossAxisAlignment.center,
+              //       children: [
+              //         Icon(
+              //           CupertinoIcons.wand_stars_inverse,
+              //           color: textLight,
+              //         ),
+              //         const SizedBox(
+              //           width: 10,
+              //         ),
+              //         Text(
+              //           mood,
+              //           style: GoogleFonts.montserrat(
+              //             fontSize: 20,
+              //             color: textLight,
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   )
+              //     : SizedBox(
+              //   height: 40,
+              //   width: 60,
+              //   child: Center(
+              //     child: SizedBox(
+              //       height: 30,
+              //       child: MusicVisualizer(
+              //         barCount: 5,
+              //         colors: [
+              //           Colors.white,
+              //           Colors.purpleAccent.shade400,
+              //           Colors.white,
+              //           Colors.purpleAccent.shade400,
+              //           Colors.white
+              //         ],
+              //         duration: const [900, 700, 600, 800, 500],
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // isLoading
+              //     ? Container(child: Text(test[0].toString()),)
+              //     // ? Container(
+              //     //     height: 40,
+              //     //     width: 0.8 * size.width,
+              //     //     color: dark.color,
+              //     //     child: Row(
+              //     //       mainAxisAlignment: MainAxisAlignment.center,
+              //     //       crossAxisAlignment: CrossAxisAlignment.center,
+              //     //       children: [
+              //     //         Icon(
+              //     //           CupertinoIcons.wand_stars_inverse,
+              //     //           color: textLight,
+              //     //         ),
+              //     //         const SizedBox(
+              //     //           width: 10,
+              //     //         ),
+              //     //         Text(
+              //     //           mood,
+              //     //           style: GoogleFonts.montserrat(
+              //     //             fontSize: 20,
+              //     //             color: textLight,
+              //     //           ),
+              //     //         ),
+              //     //       ],
+              //     //     ),
+              //     //   )
+              //     : SizedBox(
+              //         height: 40,
+              //         width: 60,
+              //         child: Center(
+              //           child: SizedBox(
+              //             height: 30,
+              //             child: MusicVisualizer(
+              //               barCount: 5,
+              //               colors: [
+              //                 Colors.white,
+              //                 Colors.purpleAccent.shade400,
+              //                 Colors.white,
+              //                 Colors.purpleAccent.shade400,
+              //                 Colors.white
+              //               ],
+              //               duration: const [900, 700, 600, 800, 500],
+              //             ),
+              //           ),
+              //         ),
+              //       ),
+              const SizedBox(
+                height: 45,
+              ),
+              musicPlayerControls(song: player.queue.songs[player.queue.currentIndex]),
             ],
           ),
         ),
@@ -419,18 +534,23 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   // Widget predictedMood(){
+  //   String songName = player.queue.songs[player.queue.currentIndex].title.toString();
   //   Size size = MediaQuery.of(context).size;
   //   return SizedBox(
   //     child: FutureBuilder(
-  //       future: Helpers().predictMood(widget.song.title.toString()),
+  //       future: testFunction(),
+  //       //future: Helpers().predictMood(songName),
   //       builder: (ctx,ss){
-  //         if(ss.connectionState == ConnectionState.done && ss.hasData){
-  //           String mood = ss.data.toString();
-  //           print(mood);
+  //         if(ss.connectionState == ConnectionState.done){
+  //           // setMood(ss.data.toString());
+  //           String m = ss.data.toString();
+  //           // print(mood);
+  //           print(m);
   //           return SizedBox(
   //             height: 30,
   //             width: 0.8 * size.width,
-  //             child: Center(child: Text("MOOD : $mood",
+  //             child: Center(
+  //                 child: Text("MOOD : $m",
   //               style: GoogleFonts.montserrat(
   //                   fontSize: 20,
   //                   color: textLight
@@ -439,6 +559,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   //           );
   //         }
   //         if(ss.hasError){
+  //           print("ERROR" + ss.error.toString());
   //           return const SizedBox(
   //             height: 30,
   //             width: 30,
@@ -550,6 +671,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
               setState(() {
                 isLiked = !isLiked;
               });
+              if(isLiked) likeSong(player.queue.songs[player.queue.currentIndex].id.toString());
+              else unlikeSong(player.queue.songs[player.queue.currentIndex].id.toString());
             },
           ),
           IconButton(
@@ -587,7 +710,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
     return Container(
       width: size.width,
       decoration: BoxDecoration(
-        color: bgDark,
+        color: bgDark.withOpacity(0.5),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -700,12 +823,15 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       IconButton(
                         onPressed: () {
                           setState(() {
+                            mood = "Loading...";
                             if (player.playPrevious()) {
                               getAudio(true);
                               _updatePalette();
+                              // testFunction().then((value){isLoading = false;});
                             } else {
                               getAudio(false);
                               _updatePalette();
+                              // testFunction().then((value){isLoading = false;});
                             }
                           });
                         },
@@ -755,13 +881,16 @@ class _MusicPlayerState extends State<MusicPlayer> {
                           print("Pressed Next:");
                           print(player);
                           setState(() {
+                            mood = "Loading...";
                             // player.isPlaying = !player.isPlaying;
                             if (player.playNext()) {
                               getAudio(true);
                               _updatePalette();
+                              // testFunction().then((value){isLoading = false;});
                             } else {
                               getAudio(false);
                               _updatePalette();
+                              // testFunction().then((value){isLoading = false;});
                             }
                           });
                         },
@@ -791,7 +920,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             ),
           ),
           const SizedBox(
-            height: 30,
+            height: 20,
           ),
         ],
       ),

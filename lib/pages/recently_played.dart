@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:verbyl_project/pages/song_card.dart';
+import 'package:verbyl_project/services/data.dart';
 import '../models/song.dart';
 import '../theme.dart';
 import 'mini_music_player.dart';
@@ -56,22 +57,31 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
               onPressed: () {
                 Navigator.pop(context);
               },
-            ), //IconButton
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: () {},
-              ), //IconButton
-            ], //<Widget>[]
+            ), //IconButton//<Widget>[]
           ), //SliverAppBar
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (context, index) => SongCard(
-                songs: widget.songs[index],
+            delegate: SliverChildListDelegate([
+              SizedBox(
+                height: 500,
+                child: FutureBuilder(
+                  future: getRecentlyPlayed(),
+                  builder: (ctx, ss) {
+                    if(ss.hasData && ss.connectionState == ConnectionState.done){
+                      List<Datum> songList = ss.data as List<Datum>;
+                      return ListView.builder(
+                        itemBuilder: (context, index) {
+                          return SongCard(songs: songList[index]);
+                        },
+                        itemCount: songList.length,
+                      );
+                    }
+                    if(ss.hasError) return Center(child: CircularProgressIndicator(color: Colors.red,));
+                    return Center(child: CircularProgressIndicator(color: primary,));
+                  },
+                ),
               ),
-              childCount: widget.songs.length,
-            ),
-          )
+            ]),
+          ),
         ],
       ),
     ));

@@ -259,8 +259,7 @@ class _LibraryState extends State<Library> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (ctx) =>
-                              LikedSongs(songs: player.queue.songs),
+                          builder: (ctx) => LikedSongs(),
                         ));
                   }),
               makeListCard(
@@ -485,16 +484,12 @@ class _LibraryState extends State<Library> {
         ),
       ),
       onTap: () {
-        // PlaylistPage(title: title);
-        //Helpers().getData("hailee").then((value) {
-        //   Navigator.push(
-        //       context,
-        //       MaterialPageRoute(
-        //           builder: (ctx) => PlaylistPage(
-        //                 playlist: plist,
-        //                 songs: value.data!,
-        //               )));
-        // });
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (ctx) => PlaylistPage(
+                  playlist: plist,
+                )));
         debugPrint(title);
       },
     );

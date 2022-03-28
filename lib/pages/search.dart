@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:verbyl_project/pages/song_card.dart';
+import 'package:verbyl_project/pages/songsByMood.dart';
 import 'package:verbyl_project/services/helpers.dart';
 import 'package:verbyl_project/models/song.dart';
 import '../models/general.dart';
@@ -88,22 +89,18 @@ class _SearchState extends State<Search> {
             _makeMoodButton(
               mood: "Happy",
               clr: Colors.redAccent,
-              onPressed: (){}
             ),
             _makeMoodButton(
                 mood: "Energetic",
                 clr: Colors.deepPurple,
-                onPressed: (){}
             ),
             _makeMoodButton(
                 mood: "Sad",
                 clr: const Color(0xFF211d22),
-                onPressed: (){}
             ),
             _makeMoodButton(
                 mood: "Calm",
                 clr: const Color(0xFF00b9bc),
-                onPressed: (){}
             ),
           ],
         ),
@@ -111,10 +108,13 @@ class _SearchState extends State<Search> {
     );
   }
 
-  Widget _makeMoodButton({required String mood,required Function() onPressed,required Color clr}){
+  Widget _makeMoodButton({required String mood,required Color clr}){
     Size size = MediaQuery.of(context).size;
     return GestureDetector(
-      onTap: onPressed,
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(
+            builder: (ctx) => SongsByMood(color: clr, mood: mood)));
+      },
       child: Column(
         children: [
           Container(

@@ -9,7 +9,7 @@ class MusicPlayerModel{
   Duration duration = const Duration();
   Duration position = const Duration();
 
-  bool isPlaying = false;
+  bool isPlaying = true;
 
   void play(){
     this.isPlaying = true;

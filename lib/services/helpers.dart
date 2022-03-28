@@ -102,15 +102,25 @@ class Helpers{
     return url;
   }
 
-  Future<String> predictMood(String songName) async {
-    String spotifyURL = await getSpotifyURL(songName);
-    final params = {"song": spotifyURL};
-    var uri = Uri.parse("https://verbyl-heroku.herokuapp.com/predict");
-    final response = await http.post(uri,body: params);
-    final responseBody = jsonDecode(response.body);
-    String mood = responseBody["mood"].toString();
-    debugPrint("Mood of $songName : $mood");
-    return mood;
+  Future<String> predictMood(String songName, String deezerId) async {
+    final resp = await http.post(Uri.parse("https://verbyl24.000webhostapp.com/getSong.php"),body: {
+      "deezerid": deezerId,
+    });
+    var x = jsonDecode(resp.body);
+    if(x.length != 0){
+      print("From DB Mood");
+      return x[0]['Mood'].toString().toUpperCase();
+    }
+    else{
+      String spotifyURL = await getSpotifyURL(songName);
+      final params = {"song": spotifyURL};
+      var uri = Uri.parse("https://verbyl-heroku.herokuapp.com/predict");
+      final response = await http.post(uri,body: params);
+      final responseBody = jsonDecode(response.body);
+      String mood = responseBody["mood"].toString();
+      debugPrint("Mood of $songName : $mood");
+      return mood;
+    }
   }
 
   Future<ArtistAndSearchQueryResults> getSearchResults(String query) async {

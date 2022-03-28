@@ -104,8 +104,10 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(const Duration(seconds: 2), (){
       getLocation().then((value){
-        verbylUserLocation = value.address;
-        isLocationPermissionDenied = value.isLocationDenied;
+        setState(() {
+          verbylUserLocation = value.address;
+          isLocationPermissionDenied = value.isLocationDenied;
+        });
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const AuthenticationWrapper())
         );
