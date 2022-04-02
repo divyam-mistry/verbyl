@@ -88,6 +88,7 @@ class Helpers{
     String url;
     songName = songName.trim().toLowerCase();
     print("SONG : " + songName);
+    // if(songName.length >= 20) songName = songName.substring(0,20);
     var uri = Uri.parse("https://spotify23.p.rapidapi.com/search/?q=$songName&type=tracks&offset=0&limit=10&numberOfTopResults=5");
     final response = await http.get( uri,
       headers: {

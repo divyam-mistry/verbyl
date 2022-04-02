@@ -5,6 +5,7 @@ import '../models/artist.dart';
 import '../models/playlist.dart';
 import '../models/song.dart';
 import 'helpers.dart';
+import 'package:intl/intl.dart';
 
 int uid = 0;
 String cityId = "0";
@@ -124,29 +125,78 @@ Future<void> addSongToRecentlyPlayed(Datum song, String? cityId, String mood, Da
   String dateTime = (creationDate.day.toString() + "-" + creationDate.month.toString() + "-" +
       creationDate.year.toString() + " " + creationDate.hour.toString() + "h " + creationDate.minute.toString() + "m");
   String deezerID = song.id.toString();
+  await addSongToDB(song, cityId, mood);
   final resp1 = await http.post(Uri.parse("https://verbyl24.000webhostapp.com/addSongToRecentlyPlayed.php"), body: {
     "uid": uid.toString(),
     "cid": cityId.toString(),
     "deezerid": deezerID,
     "date": dateTime.toString(),
   });
-  await addSongToDB(song, cityId, mood);
 }
 
-Future<List<Datum>> getRecentlyPlayed() async {
+class RPSongsAndDateList{
+  List<Datum> songs = [];
+  List<DateTime> dates = [];
+
+  RPSongsAndDateList(List<Datum> s,List<DateTime> d){
+    songs = s;
+    dates = d;
+  }
+}
+
+DateTime getDate(String date){
+  //1-4-2022 14h 20m
+  var toFind = ['-','-',' ','h','m'];
+  int toFindIndex = 0;
+  List<int> list = [];
+  String temp = "";
+  for(int i=0; i<date.length; i++){
+    if(date[i].contains(toFind[toFindIndex])){
+      list.add(int.parse(temp));
+      toFindIndex++;
+      temp = "";
+    }
+    else {
+      temp += date[i];
+    }
+  }
+  DateTime dateTime = DateTime(list[2],list[1],list[0],list[3],list[4]);
+  return dateTime;
+}
+
+Future<RPSongsAndDateList> getRecentlyPlayed() async {
+  DateFormat dateFormat = DateFormat("dd-MM-yyyy HH\h mm\m");
   final resp1 = await http.post(Uri.parse("https://verbyl24.000webhostapp.com/getUserRecentlyPlayed.php"), body: {
     "uid": uid.toString(),
   });
   print(resp1.body);
   var s = jsonDecode(resp1.body);
   List<Datum> songs = [];
-  for(int i = 1; i<songs.length; i++){
-    await Helpers().getData(s["DeezerId"].toString()).then((value){
-      songs.add(value.data![0]);
-    });
+  List<DateTime> dates = [];
+  for(int i = 0; i<resp1.body.length; i++){
+    if(songs.length == 10) {
+      break;
+    } else if(i == 0){
+      await Helpers().getData(s[i]["Name"].toString()).then((value){
+        if(i > 1 && s[i]["Date"] != s[i-1]["Date"]){
+          songs.add(value.data![0]);
+          dates.add(getDate(s[i]["Date"].toString()));
+        }
+      });
+    }
+    else if(i >= 1 && s[i]["Name"].toString() != s[i-1]["Name"].toString()){
+      await Helpers().getData(s[i]["Name"].toString()).then((value){
+        songs.add(value.data![0]);
+        dates.add(getDate(s[i]["Date"].toString()));
+      });
+    }
   }
-  print("returned songs");
-  return songs;
+  print("songs : ");
+  songs.forEach((element) {print(element.title.toString());});
+  print("dates : ");
+  print(dates);
+  print("returned recently played songs");
+  return RPSongsAndDateList(songs,dates);
 }
 
 Future<void> addSongToPlaylists(Datum song, List<Playlist> playlists) async {

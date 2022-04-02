@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> {
                           builder: (ctx, ss) {
                             if (ss.hasData && ss.connectionState == ConnectionState.done) {
                               List<ArtistData> artistList = ss.data as List<ArtistData>;
-                              return Column(
+                              if(artistList.isNotEmpty) return Column(
                                 children: [
                                   Align(
                                     alignment: Alignment.topLeft,
@@ -211,6 +211,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ],
                               );
+                              return const SizedBox();
                             }
                             if (ss.hasError) {
                               return Align(

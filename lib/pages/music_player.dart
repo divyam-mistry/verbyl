@@ -68,23 +68,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
     });
     print("ff");
     print(player.position);
-    // if(player.position.inSeconds >= 28){
-    //   player.audioPlayer.onPlayerCompletion.listen((event) {
-    //     print("Next song started");
-    //     player.isPlaying = true;
-    //     if (player.playNext()) {
-    //       getAudio(true);
-    //       _updatePalette();
-    //       setState(() {});
-    //       // testFunction().then((value){isLoading = false;});
-    //     } else {
-    //       getAudio(false);
-    //       _updatePalette();
-    //       setState(() {});
-    //       // testFunction().then((value){isLoading = false;});
-    //     }
-    //   });
-    // }
+    player.audioPlayer.onPlayerCompletion.listen((event) {
+      setState((){});
+    });
     // if (player.duration.inSeconds == player.position.inSeconds) {
     //   player.position = Duration(seconds: 0);
     //   print(player.position);

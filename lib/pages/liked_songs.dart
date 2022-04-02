@@ -7,7 +7,7 @@ import '../theme.dart';
 import 'mini_music_player.dart';
 
 class LikedSongs extends StatefulWidget {
-  LikedSongs({Key? key}) : super(key: key);
+  const LikedSongs({Key? key}) : super(key: key);
 
   @override
   _LikedSongsState createState() => _LikedSongsState();

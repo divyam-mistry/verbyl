@@ -7,8 +7,7 @@ import '../theme.dart';
 import 'mini_music_player.dart';
 
 class RecentlyPlayed extends StatefulWidget {
-  List<Datum> songs;
-  RecentlyPlayed({Key? key,required this.songs}) : super(key: key);
+  const RecentlyPlayed({Key? key}) : super(key: key);
 
   @override
   _RecentlyPlayedState createState() => _RecentlyPlayedState();
@@ -17,7 +16,8 @@ class RecentlyPlayed extends StatefulWidget {
 class _RecentlyPlayedState extends State<RecentlyPlayed> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child: Scaffold(
+    return SafeArea(
+        child: Scaffold(
       persistentFooterButtons: const [
         MiniMusicPlayer(),
       ],
@@ -33,7 +33,7 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                     fontSize: 20,
                     color: textLight,
                   ) //TextStyle
-              ),
+                  ),
               background: Center(
                 child: Container(
                   decoration: BoxDecoration(
@@ -50,7 +50,7 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                 ),
               ),
             ), //FlexibleSpaceBar
-            expandedHeight: 240,
+            expandedHeight: 200,
             backgroundColor: Colors.blueAccent.shade400,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios),
@@ -66,17 +66,52 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                 child: FutureBuilder(
                   future: getRecentlyPlayed(),
                   builder: (ctx, ss) {
-                    if(ss.hasData && ss.connectionState == ConnectionState.done){
-                      List<Datum> songList = ss.data as List<Datum>;
-                      return ListView.builder(
-                        itemBuilder: (context, index) {
-                          return SongCard(songs: songList[index]);
-                        },
-                        itemCount: songList.length,
+                    if (ss.hasData &&
+                        ss.connectionState == ConnectionState.done) {
+                      RPSongsAndDateList rp = ss.data as RPSongsAndDateList;
+                      List<Datum> songList = rp.songs;
+                      List<DateTime> dateList = rp.dates;
+                      List<int> isAlreadyPrinted = [];
+                      isAlreadyPrinted.add(0);
+                      for(int i = 1; i<dateList.length; i++){
+                        if(dateList[i].day != dateList[i-1].day){
+                          isAlreadyPrinted.add(i);
+                        }
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            String dateTimeText = dateList[index].toString().substring(0,10);
+                            if(dateList[index].day == DateTime.now().day) dateTimeText = "Today";
+                            return Column(
+                              children: [
+                                (isAlreadyPrinted.contains(index)) ? Padding(
+                                  padding: const EdgeInsets.only(left: 20),
+                                  child: Align(
+                                    child: Text(dateTimeText,
+                                      style: GoogleFonts.montserrat(color: textLight,fontSize: 16, fontWeight: FontWeight.bold),
+                                    ),
+                                    alignment: Alignment.topLeft,
+                                  ),
+                                ) : const SizedBox(),
+                                SongCard(songs: songList[index])
+                              ],
+                            );
+                          },
+                          itemCount: songList.length,
+                        ),
                       );
                     }
-                    if(ss.hasError) return Center(child: CircularProgressIndicator(color: Colors.red,));
-                    return Center(child: CircularProgressIndicator(color: primary,));
+                    if (ss.hasError)
+                      return const Center(
+                          child: CircularProgressIndicator(
+                        color: Colors.red,
+                      ));
+                    return Center(
+                        child: CircularProgressIndicator(
+                      color: primary,
+                    ));
                   },
                 ),
               ),

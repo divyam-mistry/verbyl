@@ -250,33 +250,38 @@ class _LibraryState extends State<Library> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              makeListCard(
-                  title: "Liked Songs",
-                  numOfSongs: 5,
-                  color: Colors.redAccent.shade400,
-                  icon: const Icon(Icons.favorite_rounded),
-                  func: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (ctx) => LikedSongs(),
-                        ));
-                  }),
-              makeListCard(
-                  title: "Recently Played",
-                  numOfSongs: 10,
-                  color: Colors.blueAccent.shade400,
-                  icon: const Icon(
-                    Icons.history_rounded,
-                  ),
-                  func: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (ctx) =>
-                              RecentlyPlayed(songs: player.queue.songs),
-                        ));
-                  }),
+              SizedBox(
+                height: 100,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    makeListCard(
+                        title: "Liked\nSongs",
+                        color: Colors.redAccent.shade400,
+                        icon: const Icon(Icons.favorite_rounded),
+                        func: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) => LikedSongs(),
+                              ));
+                        }),
+                    makeListCard(
+                        title: "Recently\nPlayed",
+                        color: Colors.blueAccent.shade400,
+                        icon: const Icon(
+                          Icons.history_rounded,
+                        ),
+                        func: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) => RecentlyPlayed(),
+                              ));
+                        }),
+                  ],
+                ),
+              ),
               const SizedBox(
                 height: 8,
               ),
@@ -326,61 +331,51 @@ class _LibraryState extends State<Library> {
   Widget makeListCard(
       {required String title,
       required Icon icon,
-      required int numOfSongs,
       required Color color,
       required Function() func}) {
     return GestureDetector(
-      child: SizedBox(
-        height: 80,
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.2)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+      child: Container(
+        height: 60,
+        width: 0.45 * MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.25),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 60,
+              width: 60,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color, color.withOpacity(0.2)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: Center(
-                  child: Icon(
-                    icon.icon,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  topLeft: Radius.circular(10),
                 ),
               ),
-              const SizedBox(
-                width: 20,
+              child: Center(
+                child: Icon(
+                  icon.icon,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.montserrat(
-                      fontSize: 18,
-                      color: textLight,
-                    ),
-                  ),
-                  Text(
-                    numOfSongs.toString() + " songs",
-                    style: GoogleFonts.montserrat(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
+            ),
+            const SizedBox(
+              width: 15,
+            ),
+            Text(
+              title,
+              style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: textLight,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       onTap: func,
