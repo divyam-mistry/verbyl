@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:music_visualizer/music_visualizer.dart';
@@ -15,6 +16,7 @@ import '/theme.dart';
 import 'authentication/login_email.dart';
 import 'models/charts.dart';
 import 'pages/home.dart';
+import 'package:device_preview/device_preview.dart';
 import 'services/helpers.dart';
 
 //String magicAuthCredentials = "pk_live_B8336C86A7989E33";
@@ -28,7 +30,13 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    runApp(const MyApp());
+    runApp(
+      const MyApp(),
+      // DevicePreview(
+      //   builder: (context) => const MyApp(),
+      //   enabled: !kReleaseMode,
+      // )
+    );
   }
   );
 }

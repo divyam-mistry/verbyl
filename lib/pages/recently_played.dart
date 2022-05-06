@@ -71,10 +71,12 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                       RPSongsAndDateList rp = ss.data as RPSongsAndDateList;
                       List<Datum> songList = rp.songs;
                       List<DateTime> dateList = rp.dates;
+                      print(songList.length);
+                      print(dateList.length);
                       List<int> isAlreadyPrinted = [];
                       isAlreadyPrinted.add(0);
                       for(int i = 1; i<dateList.length; i++){
-                        if(dateList[i].day != dateList[i-1].day){
+                        if(dateList[i].day != dateList[i-1].day ){
                           isAlreadyPrinted.add(i);
                         }
                       }
@@ -83,7 +85,8 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                         child: ListView.builder(
                           itemBuilder: (context, index) {
                             String dateTimeText = dateList[index].toString().substring(0,10);
-                            if(dateList[index].day == DateTime.now().day) dateTimeText = "Today";
+                            if(dateList[index].day == DateTime.now().day && dateList[index].month == DateTime.now().month)
+                              dateTimeText = "Today";
                             return Column(
                               children: [
                                 (isAlreadyPrinted.contains(index)) ? Padding(
@@ -103,11 +106,13 @@ class _RecentlyPlayedState extends State<RecentlyPlayed> {
                         ),
                       );
                     }
-                    if (ss.hasError)
+                    if (ss.hasError) {
+                      print(ss.error.toString());
                       return const Center(
                           child: CircularProgressIndicator(
                         color: Colors.red,
                       ));
+                    }
                     return Center(
                         child: CircularProgressIndicator(
                       color: primary,

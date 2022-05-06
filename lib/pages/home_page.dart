@@ -88,13 +88,18 @@ class _HomePageState extends State<HomePage> {
             elevation: 0.0,
             title: Text(greeting(), style: GoogleFonts.montserrat(fontSize: 20)),
             actions: [
-              CircleAvatar(
-                backgroundColor: Colors.redAccent,
-                child: Text(
-                  authenticationController.userEmail.isEmpty
-                      ? "?"
-                      : authenticationController.userEmail[0].toUpperCase(),
-                  style: GoogleFonts.montserrat(color: textLight, fontSize: 20),
+              GestureDetector(
+                onTap: (){
+                  setState(() {});
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.redAccent,
+                  child: Text(
+                    authenticationController.userEmail.isEmpty
+                        ? "?"
+                        : authenticationController.userEmail[0].toUpperCase(),
+                    style: GoogleFonts.montserrat(color: textLight, fontSize: 20),
+                  ),
                 ),
               ),
               const SizedBox(

@@ -246,7 +246,7 @@ class Helpers{
         else {
           finalDeezerList.add(value.data![0]);
         }
-      });
+      }).onError((error, stackTrace) => null);
     }
     return finalDeezerList;
 

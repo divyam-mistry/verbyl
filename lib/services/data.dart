@@ -75,7 +75,7 @@ Future<List<Datum>> getPlaylistSongs(String pid) async {
   for(var x in t){
     await Helpers().getData(x["Name"].toString()).then((value){
       songs.add(value.data![0]);
-    });
+    }).onError((error, stackTrace) => null);
   }
   return songs;
 }
@@ -169,30 +169,50 @@ Future<RPSongsAndDateList> getRecentlyPlayed() async {
   final resp1 = await http.post(Uri.parse("https://verbyl24.000webhostapp.com/getUserRecentlyPlayed.php"), body: {
     "uid": uid.toString(),
   });
+  print("Response 1");
   print(resp1.body);
   var s = jsonDecode(resp1.body);
   List<Datum> songs = [];
   List<DateTime> dates = [];
   for(int i = 0; i<resp1.body.length; i++){
+
+    print(songs.length);
     if(songs.length == 10) {
       break;
-    } else if(i == 0){
+    }
+    else if(i == 0){
+      print("Aiya");
       await Helpers().getData(s[i]["Name"].toString()).then((value){
         if(i > 1 && s[i]["Date"] != s[i-1]["Date"]){
+          print("Aiya Ni");
           songs.add(value.data![0]);
           dates.add(getDate(s[i]["Date"].toString()));
         }
-      });
+        else{
+          print("Aiya 2");
+          songs.add(value.data![0]);
+          dates.add(getDate(s[i]["Date"].toString()));
+          print("Aiya 2 end");
+        }
+      }).onError((error, stackTrace) => null);
     }
-    else if(i >= 1 && s[i]["Name"].toString() != s[i-1]["Name"].toString()){
+    else if(i >= 1 && s.length > i && s[i]["Name"].toString() != s[i-1]["Name"].toString()){
       await Helpers().getData(s[i]["Name"].toString()).then((value){
         songs.add(value.data![0]);
         dates.add(getDate(s[i]["Date"].toString()));
+      }).onError((error, stackTrace){
+        print(error.toString());
       });
     }
+    else{
+      print("else");
+    }
+    print("for" + i.toString());
   }
   print("songs : ");
-  songs.forEach((element) {print(element.title.toString());});
+  songs.forEach((element) {
+    print(element.title.toString());
+  });
   print("dates : ");
   print(dates);
   print("returned recently played songs");
@@ -218,7 +238,7 @@ Future<List<Datum>> getSongsByMood(String mood) async {
   for(var s in x){
     await Helpers().getData(s["Name"].toString()).then((value){
       songList.add(value.data![0]);
-    });
+    }).onError((error, stackTrace){});
   }
   return songList;
 }
@@ -233,7 +253,7 @@ Future<List<ArtistData>> getUserFollowingArtists() async {
   for(var x in list){
     await Helpers().getArtistData(x["Name"].toString()).then((value){
       artistList.add(value);
-    });
+    }).onError((error, stackTrace) => null);
   }
   followArtists = true;
   return artistList;
@@ -293,7 +313,7 @@ Future<List<Datum>> getLikedSongs() async {
   for(var x in s){
     await Helpers().getData(x["Name"].toString()).then((value){
       songs.add(value.data![0]);
-    });
+    }).onError((error, stackTrace){});
   }
   print("returned songs");
   return songs;

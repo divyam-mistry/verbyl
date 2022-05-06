@@ -61,7 +61,7 @@ class _LikedSongsState extends State<LikedSongs> {
           SliverList(
             delegate: SliverChildListDelegate([
               SizedBox(
-                height: 500,
+                height: 480,
                 child: FutureBuilder(
                     future: getLikedSongs(),
                     builder: (ctx, ss) {
